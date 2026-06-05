@@ -46,6 +46,7 @@
                 @auth
                     <a href="{{ route('dashboard') }}" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="h-4 w-4"></i>Buka Dashboard</a>
                 @else
+                    <a href="{{ route('member.signup') }}" class="hidden sm:inline-flex items-center border border-slate-700 hover:border-accent text-slate-200 hover:text-accent font-semibold px-4 py-2 rounded-xl text-sm transition-all">Daftar</a>
                     <a href="{{ route('login') }}" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg flex items-center gap-1.5"><i data-lucide="log-in" class="h-4 w-4"></i>Masuk</a>
                 @endauth
             </div>
@@ -68,11 +69,13 @@
                     <div class="flex flex-col sm:flex-row gap-3 mt-8 justify-center lg:justify-start">
                         @auth
                             <a href="{{ route('dashboard') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="layout-dashboard" class="h-5 w-5"></i>Buka Dashboard</a>
+                            <a href="#fitur" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-6 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2">Lihat Fitur <i data-lucide="arrow-down" class="h-4 w-4"></i></a>
                         @else
-                            <a href="{{ route('login') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-5 w-5"></i>Masuk ke Aplikasi</a>
+                            <a href="{{ route('member.signup') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="user-plus" class="h-5 w-5"></i>Daftar Jadi Member</a>
+                            <a href="{{ route('login') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-6 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-4.5 w-4.5"></i>Masuk</a>
                         @endauth
-                        <a href="#fitur" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-6 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2">Lihat Fitur <i data-lucide="arrow-down" class="h-4 w-4"></i></a>
                     </div>
+                    @guest<p class="mt-4 text-xs text-slate-500 text-center lg:text-left">Gratis daftar · aktivasi langganan oleh admin · <a href="#fitur" class="text-accent font-semibold hover:underline">lihat fitur ↓</a></p>@endguest
                     <div class="flex flex-wrap gap-x-5 gap-y-2 mt-6 justify-center lg:justify-start text-xs text-slate-500 font-semibold">
                         <span class="flex items-center gap-1.5"><i data-lucide="check" class="h-3.5 w-3.5 text-accent"></i>Bisa diinstall di HP (PWA)</span>
                         <span class="flex items-center gap-1.5"><i data-lucide="check" class="h-3.5 w-3.5 text-accent"></i>Mode terang &amp; gelap</span>
@@ -192,15 +195,16 @@
                 <div class="hero-glow absolute inset-0 opacity-60 pointer-events-none"></div>
                 <div class="relative">
                     <h2 class="text-3xl md:text-4xl font-black text-white">Siap bikin laundry Anda lebih rapi &amp; cuan?</h2>
-                    <p class="text-slate-400 mt-3 max-w-xl mx-auto">Masuk ke aplikasi sekarang, atau arahkan pelanggan untuk mendaftar sendiri lewat QR.</p>
+                    <p class="text-slate-400 mt-3 max-w-xl mx-auto">Daftar jadi member sekarang untuk mulai mengelola laundry Anda — atau arahkan pelanggan mendaftar sendiri lewat QR.</p>
                     <div class="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
                         @auth
                             <a href="{{ route('dashboard') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-7 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="layout-dashboard" class="h-5 w-5"></i>Buka Dashboard</a>
                         @else
-                            <a href="{{ route('login') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-7 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-5 w-5"></i>Masuk ke Aplikasi</a>
+                            <a href="{{ route('member.signup') }}" class="bg-accent hover:bg-accent-hover text-white font-bold px-7 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"><i data-lucide="user-plus" class="h-5 w-5"></i>Daftar Jadi Member</a>
+                            <a href="{{ route('login') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-7 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-5 w-5"></i>Masuk</a>
                         @endauth
-                        <a href="{{ route('register.show') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-7 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2"><i data-lucide="qr-code" class="h-5 w-5 text-accent"></i>Daftar sebagai Pelanggan</a>
                     </div>
+                    <p class="relative text-xs text-slate-500 mt-5">Pelanggan laundry? <a href="{{ route('register.show') }}" class="text-accent font-semibold hover:underline">Daftar via QR di sini &rarr;</a></p>
                 </div>
             </div>
         </section>
@@ -215,6 +219,7 @@
             </div>
             <div class="flex items-center gap-5 text-sm font-semibold text-slate-400">
                 <a href="#fitur" class="hover:text-accent transition-colors">Fitur</a>
+                @guest<a href="{{ route('member.signup') }}" class="hover:text-accent transition-colors">Daftar Member</a>@endguest
                 <a href="{{ route('register.show') }}" class="hover:text-accent transition-colors">Daftar Pelanggan</a>
                 @auth<a href="{{ route('dashboard') }}" class="hover:text-accent transition-colors">Dashboard</a>@else<a href="{{ route('login') }}" class="hover:text-accent transition-colors">Masuk</a>@endauth
             </div>

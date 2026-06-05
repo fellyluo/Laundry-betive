@@ -13,9 +13,14 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MemberSignupController;
 
 // ---- Landing page (publik) ----
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+
+// ---- Daftar jadi member/pengguna aplikasi (publik) ----
+Route::get('/daftar-member', [MemberSignupController::class, 'show'])->name('member.signup');
+Route::post('/daftar-member', [MemberSignupController::class, 'store'])->name('member.signup.store');
 
 // ---- Public self-registration (pelanggan scan QR — tanpa login) ----
 Route::get('/daftar', [RegistrationController::class, 'show'])->name('register.show');

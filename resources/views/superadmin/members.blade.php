@@ -4,7 +4,7 @@
 @php
     function member_status_badge($u) {
         if ($u->isSuperAdmin()) return ['Super Admin', 'bg-accent/10 text-accent border border-accent/20'];
-        if (! $u->is_active) return ['Suspend', 'bg-rose-500/10 text-rose-400 border border-rose-500/20'];
+        if (! $u->is_active) return ['Nonaktif', 'bg-rose-500/10 text-rose-400 border border-rose-500/20'];
         if ($u->subscriptionExpired()) return ['Kedaluwarsa', 'bg-rose-500/10 text-rose-400 border border-rose-500/20'];
         return ['Aktif', 'bg-emerald-500/10 text-emerald-450 border border-emerald-500/20'];
     }
@@ -48,7 +48,9 @@
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $cls }}">{{ $label }}</span>
                                 @if($m->id === auth()->id())<span class="text-[9px] text-slate-500 font-bold uppercase">(Anda)</span>@endif
                             </div>
-                            @if($m->name)<div class="text-xs text-slate-500 mt-0.5">{{ $m->name }}</div>@endif
+                            @if($m->name || $m->phone)
+                                <div class="text-xs text-slate-500 mt-0.5">{{ $m->name }}@if($m->name && $m->phone) · @endif@if($m->phone)<a href="https://wa.me/{{ wa_number($m->phone) }}" target="_blank" class="font-mono hover:text-accent">{{ $m->phone }}</a>@endif</div>
+                            @endif
                             @unless($m->isSuperAdmin())
                             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
                                 <span><span class="text-slate-500">Paket:</span> <b class="text-slate-300">{{ $m->plan ?: '—' }}</b>@if($m->plan_price) <span class="text-slate-500">({{ format_rupiah($m->plan_price) }})</span>@endif</span>
