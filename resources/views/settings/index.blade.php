@@ -208,7 +208,10 @@
                     <input type="text" name="username" value="{{ old('username') }}" placeholder="Username *" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all font-mono">
                 </div>
                 <div>
-                    <input type="password" name="password" placeholder="Password * (min. 6)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                    <div class="relative">
+                        <input type="password" name="password" id="addUserPass" placeholder="Password * (min. 6)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                        <button type="button" onclick="togglePass('addUserPass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
+                    </div>
                 </div>
                 @if($errors->has('username') || $errors->has('password') || $errors->has('name'))
                     <p class="text-xs text-rose-500">{{ $errors->first('username') ?: ($errors->first('password') ?: $errors->first('name')) }}</p>
@@ -230,7 +233,10 @@
                 <p class="text-xs text-slate-400">User: <span id="resetPassUser" class="font-bold text-slate-200 font-mono"></span></p>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password Baru</label>
-                    <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full bg-slate-950 border border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none transition-all text-sm">
+                    <div class="relative">
+                        <input type="password" name="password" id="resetUserPass" required minlength="6" placeholder="Minimal 6 karakter" class="w-full bg-slate-950 border border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-600 focus:outline-none transition-all text-sm">
+                        <button type="button" onclick="togglePass('resetUserPass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
                     <button type="button" onclick="closeResetPass()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-300 text-sm font-semibold">Batal</button>
@@ -250,6 +256,13 @@
         const m = document.getElementById('resetPassModal'); m.classList.remove('hidden'); m.classList.add('flex');
     }
     function closeResetPass(){ const m=document.getElementById('resetPassModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+    function togglePass(id, btn) {
+        const inp = document.getElementById(id);
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.innerHTML = show ? '<i data-lucide="eye-off" class="h-4 w-4"></i>' : '<i data-lucide="eye" class="h-4 w-4"></i>';
+        if (window.lucide) lucide.createIcons();
+    }
 </script>
 @endpush
 
