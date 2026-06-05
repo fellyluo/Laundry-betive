@@ -45,6 +45,13 @@
         /* Aksen tipis & lembut */
         #lp .bg-accent\/10 { background-color: color-mix(in srgb, var(--accent-bg) 8%, transparent) !important; }
         #lp .border-accent\/20 { border-color: color-mix(in srgb, var(--accent-bg) 16%, transparent) !important; }
+
+        /* ===== Tombol pill modern & fresh ===== */
+        .btn-pill { border-radius: 9999px; transition: transform .18s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
+        .btn-primary { color: #fff; background-image: linear-gradient(135deg, var(--accent-bg), color-mix(in srgb, var(--accent-bg) 70%, #38bdf8)); box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--accent-bg) 60%, transparent); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -8px color-mix(in srgb, var(--accent-bg) 72%, transparent); }
+        .btn-ghost { color: var(--accent-font); border: 1px solid color-mix(in srgb, var(--accent-bg) 28%, transparent); background-color: color-mix(in srgb, var(--accent-bg) 6%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+        .btn-ghost:hover { transform: translateY(-1px); background-color: color-mix(in srgb, var(--accent-bg) 13%, transparent); border-color: color-mix(in srgb, var(--accent-bg) 45%, transparent); }
     </style>
 </head>
 <body id="lp" class="min-h-full font-sans text-slate-100" style="background-color: var(--background);">
@@ -63,12 +70,12 @@
                 <a href="#cara" class="hover:text-accent transition-colors">Cara Kerja</a>
                 <a href="#mulai" class="hover:text-accent transition-colors">Mulai</a>
             </nav>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2.5">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="h-4 w-4"></i>Buka Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="btn-pill btn-primary font-semibold px-5 py-2 text-sm inline-flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="h-4 w-4"></i>Buka Dashboard</a>
                 @else
-                    <a href="{{ route('member.signup') }}" class="hidden sm:inline-flex items-center border border-slate-700 hover:border-accent text-slate-200 hover:text-accent font-semibold px-4 py-2 rounded-xl text-sm transition-all">Daftar</a>
-                    <a href="{{ route('login') }}" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg flex items-center gap-1.5"><i data-lucide="log-in" class="h-4 w-4"></i>Masuk</a>
+                    <a href="{{ route('member.signup') }}" class="btn-pill btn-ghost hidden sm:inline-flex items-center gap-1.5 font-semibold px-5 py-2 text-sm"><i data-lucide="user-plus" class="h-4 w-4"></i>Daftar</a>
+                    <a href="{{ route('login') }}" class="btn-pill btn-primary font-semibold px-5 py-2 text-sm inline-flex items-center gap-1.5"><i data-lucide="log-in" class="h-4 w-4"></i>Masuk</a>
                 @endauth
             </div>
         </div>
