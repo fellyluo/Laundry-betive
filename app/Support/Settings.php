@@ -55,24 +55,34 @@ class Settings
         ];
     }
 
-    /** Fetch active settings merged onto defaults. */
-    public static function get(): array
+    /** Pemilik settings yang sedang berlaku: member -> id-nya; super admin/guest -> null (platform). */
+    public static function tenantId(): ?int
     {
-        $row = Setting::query()->first();
-        $value = $row ? $row->value : [];
-        if (! is_array($value)) {
-            $value = [];
+        $u = \Illuminate\Support\Facades\Auth::user();
+        return ($u && $u->role === 'member') ? $u->id : null;
+    }
+
+    /** Fetch settings (per member, atau platform jika $userId null) merged onto defaults. */
+    public static function get(?int $userId = null): array
+    {
+        if (func_num_args() === 0) {
+            $userId = self::tenantId();
         }
+        $row = Setting::withoutGlobalScopes()->where('user_id', $userId)->first();
+        $value = ($row && is_array($row->value)) ? $row->value : [];
         return array_replace_recursive(self::defaults(), $value);
     }
 
-    public static function save(array $value): void
+    public static function save(array $value, ?int $userId = null): void
     {
-        $row = Setting::query()->first();
+        if (func_num_args() < 2) {
+            $userId = self::tenantId();
+        }
+        $row = Setting::withoutGlobalScopes()->where('user_id', $userId)->first();
         if ($row) {
             $row->update(['value' => $value]);
         } else {
-            Setting::create(['value' => $value]);
+            Setting::create(['user_id' => $userId, 'value' => $value]);
         }
     }
 

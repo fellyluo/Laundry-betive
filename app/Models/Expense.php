@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToTenant;
 
 class Expense extends Model
 {
-    protected $fillable = ['tanggal', 'keterangan', 'kategori', 'jumlah'];
+    use BelongsToTenant;
+
+    protected $fillable = ['user_id', 'tanggal', 'keterangan', 'kategori', 'jumlah'];
 
     protected $casts = [
         'tanggal' => 'datetime',

@@ -36,6 +36,6 @@
 
     <p class="text-[11px] text-slate-500">Tunjukkan halaman ini ke kasir, atau sebutkan nama/HP Anda saat datang. Selamat datang sebagai member! 🎉</p>
 
-    <a href="{{ route('register.show') }}" class="inline-block text-xs text-accent hover:text-accent/90 font-semibold">Daftarkan pelanggan lain &rarr;</a>
+    <a href="{{ route('register.show', $customer->user_id) }}" class="inline-block text-xs text-accent hover:text-accent/90 font-semibold">Daftarkan pelanggan lain &rarr;</a>
 </div>
 @endsection

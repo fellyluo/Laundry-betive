@@ -6,12 +6,19 @@ use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Expense;
+use App\Models\Payment;
+use App\Models\User;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        // Super admin: dashboard monitoring semua member (bukan laundry sendiri)
+        if (auth()->user()->isSuperAdmin()) {
+            return $this->monitor();
+        }
+
         $orders = Order::with(['customer', 'items.service', 'payments'])
             ->orderByDesc('tanggal_masuk')
             ->get();
@@ -147,6 +154,43 @@ class DashboardController extends Controller
             'expensesThisMonth' => $expensesThisMonth,
             'netToday' => $netToday,
             'netThisMonth' => $netThisMonth,
+        ]);
+    }
+
+    /** Dashboard Super Admin: pantau bisnis semua member. */
+    private function monitor()
+    {
+        $members = User::where('role', 'member')->orderBy('username')->get();
+        $rows = [];
+        $totOrders = 0;
+        $totOmzet = 0;
+        $totCustomers = 0;
+        $aktif = 0;
+
+        foreach ($members as $m) {
+            $orderIds = Order::withoutGlobalScopes()->where('user_id', $m->id)->pluck('id');
+            $orders = $orderIds->count();
+            $omzet = (int) Payment::whereIn('order_id', $orderIds)->sum('jumlah');
+            $customers = Customer::withoutGlobalScopes()->where('user_id', $m->id)->count();
+            $blocked = $m->isBlocked();
+            if (! $blocked) {
+                $aktif++;
+            }
+            $rows[] = ['m' => $m, 'orders' => $orders, 'omzet' => $omzet, 'customers' => $customers, 'blocked' => $blocked];
+            $totOrders += $orders;
+            $totOmzet += $omzet;
+            $totCustomers += $customers;
+        }
+
+        usort($rows, fn ($a, $b) => $b['omzet'] <=> $a['omzet']);
+
+        return view('superadmin.monitor', [
+            'rows' => $rows,
+            'totalMembers' => $members->count(),
+            'aktif' => $aktif,
+            'totOrders' => $totOrders,
+            'totOmzet' => $totOmzet,
+            'totCustomers' => $totCustomers,
         ]);
     }
 

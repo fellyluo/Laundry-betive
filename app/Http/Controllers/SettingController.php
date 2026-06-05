@@ -15,7 +15,6 @@ class SettingController extends Controller
             'settings' => $settings,
             'colorPresets' => Settings::COLOR_PRESETS,
             'bgPresets' => Settings::BG_PRESETS,
-            'users' => User::orderBy('username')->get(),
         ]);
     }
 

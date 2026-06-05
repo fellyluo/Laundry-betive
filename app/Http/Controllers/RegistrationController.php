@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Order;
+use App\Models\User;
 use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,19 +13,24 @@ use Carbon\Carbon;
 
 class RegistrationController extends Controller
 {
-    /** Public self-registration + order form (dibuka pelanggan via scan QR). */
-    public function show()
+    /** Form pendaftaran + order pelanggan, untuk laundry milik member $user (scan QR). */
+    public function show(User $user)
     {
-        $settings = Settings::get();
-        $methods = collect($settings['payment_methods'])->where('aktif', true)->values();
-        $services = Service::where('aktif', true)->orderBy('kategori')->orderBy('nama')->get();
+        abort_unless($user->role === 'member', 404);
 
-        return view('register.form', ['methods' => $methods, 'services' => $services]);
+        $settings = Settings::get($user->id);
+        $methods = collect($settings['payment_methods'])->where('aktif', true)->values();
+        $services = Service::withoutGlobalScopes()->where('user_id', $user->id)
+            ->where('aktif', true)->orderBy('kategori')->orderBy('nama')->get();
+
+        return view('register.form', ['member' => $user, 'methods' => $methods, 'services' => $services]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, User $user)
     {
-        $settings = Settings::get();
+        abort_unless($user->role === 'member', 404);
+
+        $settings = Settings::get($user->id);
         $activeNames = collect($settings['payment_methods'])->where('aktif', true)->pluck('nama')->all();
 
         $validated = $request->validate([
@@ -41,15 +47,16 @@ class RegistrationController extends Controller
                 }
             }],
             'items' => 'nullable|array',
-            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.service_id' => 'required',
             'items.*.qty' => 'required|numeric|min:0.1',
         ], [
             'nama.required' => 'Nama wajib diisi',
             'no_hp.required' => 'Nomor HP wajib diisi',
         ]);
 
-        // Customer (cegah duplikat by HP)
-        $customer = Customer::where('no_hp', trim($validated['no_hp']))->first();
+        // Customer milik member ini (cegah duplikat by HP dalam scope member)
+        $customer = Customer::withoutGlobalScopes()->where('user_id', $user->id)
+            ->where('no_hp', trim($validated['no_hp']))->first();
         $custData = [
             'nama' => trim($validated['nama']),
             'alamat' => isset($validated['alamat']) && trim($validated['alamat']) !== '' ? trim($validated['alamat']) : ($customer->alamat ?? null),
@@ -58,15 +65,16 @@ class RegistrationController extends Controller
         if ($customer) {
             $customer->update($custData);
         } else {
-            $customer = Customer::create($custData + ['no_hp' => trim($validated['no_hp']), 'poin' => 0, 'via_qr' => true]);
+            $customer = Customer::create($custData + ['user_id' => $user->id, 'no_hp' => trim($validated['no_hp']), 'poin' => 0, 'via_qr' => true]);
         }
 
-        // Buat order bila ada layanan dipilih
+        // Order (bila ada layanan dipilih) — hanya layanan milik member ini
         $order = null;
         $items = collect($validated['items'] ?? [])->filter(fn ($i) => ! empty($i['service_id']) && (float) ($i['qty'] ?? 0) > 0);
         if ($items->isNotEmpty()) {
-            $order = DB::transaction(function () use ($items, $customer) {
-                $services = Service::whereIn('id', $items->pluck('service_id'))->get()->keyBy('id');
+            $order = DB::transaction(function () use ($items, $customer, $user) {
+                $services = Service::withoutGlobalScopes()->where('user_id', $user->id)
+                    ->whereIn('id', $items->pluck('service_id'))->get()->keyBy('id');
                 $total = 0;
                 $rows = [];
                 foreach ($items as $row) {
@@ -80,15 +88,19 @@ class RegistrationController extends Controller
                     $total += $sub;
                     $rows[] = ['service_id' => $svc->id, 'qty' => $qty, 'harga_satuan' => $harga, 'subtotal' => $sub];
                 }
+                if (empty($rows)) {
+                    return null;
+                }
 
                 $prefix = Carbon::today()->format('Ymd');
-                $seq = Order::whereDate('tanggal_masuk', Carbon::today())->count() + 1;
+                $seq = Order::withoutGlobalScopes()->whereDate('tanggal_masuk', Carbon::today())->count() + 1;
                 do {
                     $nota = $prefix . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
                     $seq++;
-                } while (Order::where('nomor_nota', $nota)->exists());
+                } while (Order::withoutGlobalScopes()->where('nomor_nota', $nota)->exists());
 
                 $order = Order::create([
+                    'user_id' => $user->id,
                     'nomor_nota' => $nota,
                     'customer_id' => $customer->id,
                     'tanggal_masuk' => now(),
@@ -110,7 +122,9 @@ class RegistrationController extends Controller
 
                 return $order;
             });
-            $order->load('items.service');
+            if ($order) {
+                $order->load('items.service');
+            }
         }
 
         return view('register.success', ['customer' => $customer, 'order' => $order]);

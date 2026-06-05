@@ -8,7 +8,6 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\SubscriptionController;
@@ -22,9 +21,9 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/daftar-member', [MemberSignupController::class, 'show'])->name('member.signup');
 Route::post('/daftar-member', [MemberSignupController::class, 'store'])->name('member.signup.store');
 
-// ---- Public self-registration (pelanggan scan QR — tanpa login) ----
-Route::get('/daftar', [RegistrationController::class, 'show'])->name('register.show');
-Route::post('/daftar', [RegistrationController::class, 'store'])->name('register.store');
+// ---- Pendaftaran pelanggan via QR, per member laundry (publik) ----
+Route::get('/daftar/{user}', [RegistrationController::class, 'show'])->name('register.show');
+Route::post('/daftar/{user}', [RegistrationController::class, 'store'])->name('register.store');
 
 // ---- Authentication (public) ----
 Route::middleware('guest')->group(function () {
@@ -37,7 +36,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // ---- Application (requires login) ----
 Route::middleware('auth')->group(function () {
-    // Halaman blokir langganan (tanpa gating 'subscription' agar member terblokir tetap bisa melihatnya)
+    // Halaman blokir langganan (tanpa gating 'subscription')
     Route::get('/langganan', [SubscriptionController::class, 'blocked'])->name('langganan.blocked');
 
     // Super Admin: kelola member & langganan
@@ -51,46 +50,44 @@ Route::middleware('auth')->group(function () {
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
     });
 
-    // App utama — diblokir otomatis jika langganan member habis / di-suspend
     Route::middleware('subscription')->group(function () {
+        // Dashboard: super admin -> monitoring; member -> dashboard laundrynya
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Orders
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/baru', [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
-    Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
-    Route::post('/orders/{order}/payment', [OrderController::class, 'addPayment'])->name('orders.payment');
+        // ---- Operasional laundry (khusus member) ----
+        Route::middleware('member')->group(function () {
+            // Orders
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/baru', [OrderController::class, 'create'])->name('orders.create');
+            Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+            Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+            Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+            Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+            Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+            Route::post('/orders/{order}/payment', [OrderController::class, 'addPayment'])->name('orders.payment');
 
-    // Customers
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-    Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+            // Customers
+            Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+            Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+            Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+            Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
-    // Services
-    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
-    Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
-    Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
-    Route::post('/services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
-    Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+            // Services
+            Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+            Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+            Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
+            Route::post('/services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
+            Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
 
-    // Expenses
-    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
-    Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
-    Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+            // Expenses
+            Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+            Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+            Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
-    // Users (manajemen pengguna)
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::put('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-
-    // Settings
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('/settings', [SettingController::class, 'save'])->name('settings.save');
-    Route::post('/settings/theme-mode', [SettingController::class, 'themeMode'])->name('settings.themeMode');
-    }); // end 'subscription' group
+            // Settings (laundry)
+            Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+            Route::post('/settings', [SettingController::class, 'save'])->name('settings.save');
+            Route::post('/settings/theme-mode', [SettingController::class, 'themeMode'])->name('settings.themeMode');
+        });
+    });
 });

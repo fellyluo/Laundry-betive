@@ -147,7 +147,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     let _qrObj = null;
-    function regUrl() { return window.location.origin + '/daftar'; }
+    function regUrl() { return window.location.origin + '/daftar/' + {{ auth()->id() }}; }
     function openQrModal() {
         const url = regUrl();
         const box = document.getElementById('qrBox');

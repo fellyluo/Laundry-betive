@@ -5,22 +5,25 @@
     $namaLaundry = $brand['nama_laundry'] ?? 'LaundryPro';
     $mode = $appTheme['mode'] ?? 'dark';
 
-    $nav = [
-        ['name' => 'Dashboard',  'route' => 'dashboard',       'href' => route('dashboard'),  'icon' => 'home',            'active' => request()->routeIs('dashboard')],
-        ['name' => 'Order',      'route' => 'orders.index',    'href' => route('orders.index'), 'icon' => 'clipboard-list', 'active' => request()->is('orders') || request()->is('orders/*')],
-        ['name' => 'Order Baru', 'route' => 'orders.create',   'href' => route('orders.create'),'icon' => 'plus-circle',    'active' => request()->is('orders/baru'), 'highlight' => true],
-        ['name' => 'Pelanggan',  'route' => 'customers.index', 'href' => route('customers.index'),'icon' => 'users',        'active' => request()->is('customers*')],
-        ['name' => 'Layanan',    'route' => 'services.index',  'href' => route('services.index'),'icon' => 'washing-machine','active' => request()->is('services*')],
-        ['name' => 'Pengeluaran','route' => 'expenses.index',  'href' => route('expenses.index'),'icon' => 'receipt',       'active' => request()->is('expenses*')],
-        ['name' => 'Pengaturan', 'route' => 'settings.index',  'href' => route('settings.index'),'icon' => 'settings',      'active' => request()->is('settings*')],
-    ];
+    $isSuper = auth()->check() && auth()->user()->isSuperAdmin();
 
-    // Menu khusus Super Admin (sisipkan sebelum Pengaturan); 'super' => sidebar saja, tidak di bottom-nav
-    if (auth()->check() && auth()->user()->isSuperAdmin()) {
-        array_splice($nav, count($nav) - 1, 0, [[
-            'name' => 'Member', 'route' => 'members.index', 'href' => route('members.index'),
-            'icon' => 'shield-check', 'active' => request()->is('members*'), 'super' => true,
-        ]]);
+    if ($isSuper) {
+        // Super admin: hanya Dashboard (monitoring) + Member
+        $nav = [
+            ['name' => 'Dashboard', 'href' => route('dashboard'),    'icon' => 'layout-dashboard', 'active' => request()->is('dashboard')],
+            ['name' => 'Member',    'href' => route('members.index'),'icon' => 'shield-check',     'active' => request()->is('members*')],
+        ];
+    } else {
+        // Member: operasional laundry
+        $nav = [
+            ['name' => 'Dashboard',  'href' => route('dashboard'),    'icon' => 'home',            'active' => request()->is('dashboard')],
+            ['name' => 'Order',      'href' => route('orders.index'), 'icon' => 'clipboard-list',  'active' => request()->is('orders') || request()->is('orders/*')],
+            ['name' => 'Order Baru', 'href' => route('orders.create'),'icon' => 'plus-circle',     'active' => request()->is('orders/baru'), 'highlight' => true],
+            ['name' => 'Pelanggan',  'href' => route('customers.index'),'icon' => 'users',         'active' => request()->is('customers*')],
+            ['name' => 'Layanan',    'href' => route('services.index'),'icon' => 'washing-machine','active' => request()->is('services*')],
+            ['name' => 'Pengeluaran','href' => route('expenses.index'),'icon' => 'receipt',        'active' => request()->is('expenses*')],
+            ['name' => 'Pengaturan', 'href' => route('settings.index'),'icon' => 'settings',       'active' => request()->is('settings*')],
+        ];
     }
 @endphp
 

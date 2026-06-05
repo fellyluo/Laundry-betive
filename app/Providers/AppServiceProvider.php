@@ -25,10 +25,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Make settings + resolved theme available to every view.
+        // Make settings + resolved theme available to every view (per-tenant aware).
         View::composer('*', function ($view) {
             try {
-                $settings = Settings::get();
+                // Halaman QR pelanggan (/daftar/{user}) -> pakai branding member terkait.
+                if (request()->routeIs('register.show', 'register.store') && ($m = request()->route('user'))) {
+                    $settings = Settings::get(is_object($m) ? $m->id : (int) $m);
+                } else {
+                    $settings = Settings::get(); // member -> miliknya; super admin/guest -> platform
+                }
                 $view->with('appSettings', $settings)
                      ->with('appTheme', Settings::theme($settings));
             } catch (\Throwable $e) {

@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToTenant;
 
 class Order extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
-        'nomor_nota', 'customer_id', 'tanggal_masuk', 'estimasi_selesai',
+        'user_id', 'nomor_nota', 'customer_id', 'tanggal_masuk', 'estimasi_selesai',
         'status', 'total', 'status_bayar', 'catatan',
     ];
 

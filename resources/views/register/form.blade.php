@@ -9,7 +9,7 @@
     <div class="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="h-4 w-4 shrink-0"></i><span>{{ $errors->first() }}</span></div>
 @endif
 
-<form method="POST" action="{{ route('register.store') }}" class="space-y-4">
+<form method="POST" action="{{ route('register.store', $member) }}" class="space-y-4">
     @csrf
     <div>
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Nama Lengkap</label>

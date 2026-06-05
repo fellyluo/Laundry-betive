@@ -85,13 +85,13 @@ class OrderController extends Controller
                 $statusBayar = 'lunas';
             }
 
-            // nomor_nota: YYYYMMDD-XXX
+            // nomor_nota: YYYYMMDD-XXX (unik global lintas member)
             $prefix = Carbon::today()->format('Ymd');
-            $seq = Order::whereDate('tanggal_masuk', Carbon::today())->count() + 1;
+            $seq = Order::withoutGlobalScopes()->whereDate('tanggal_masuk', Carbon::today())->count() + 1;
             do {
                 $nota = $prefix . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
                 $seq++;
-            } while (Order::where('nomor_nota', $nota)->exists());
+            } while (Order::withoutGlobalScopes()->where('nomor_nota', $nota)->exists());
 
             $order = Order::create([
                 'nomor_nota' => $nota,

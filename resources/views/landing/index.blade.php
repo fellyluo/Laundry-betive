@@ -235,7 +235,7 @@
                             <a href="{{ route('login') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold px-7 py-3.5 rounded-xl transition-all border border-slate-750/40 text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-5 w-5"></i>Masuk</a>
                         @endauth
                     </div>
-                    <p class="relative text-xs text-slate-500 mt-5">Pelanggan laundry? <a href="{{ route('register.show') }}" class="text-accent font-semibold hover:underline">Daftar via QR di sini &rarr;</a></p>
+                    <p class="relative text-xs text-slate-500 mt-5">Sudah jadi member? <a href="{{ route('login') }}" class="text-accent font-semibold hover:underline">Masuk untuk kelola laundry Anda &rarr;</a></p>
                 </div>
             </div>
         </section>

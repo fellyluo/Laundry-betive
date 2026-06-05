@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToTenant;
 
 class Setting extends Model
 {
-    protected $fillable = ['value'];
+    use BelongsToTenant;
+
+    protected $fillable = ['user_id', 'value'];
 
     protected $casts = [
         'value' => 'array',

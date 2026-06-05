@@ -19,6 +19,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // Super Admin (pemilik aplikasi)
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            ['name' => 'Administrator', 'password' => Hash::make('admin123'), 'role' => 'super_admin', 'is_active' => true]
+        );
+
+        // Member demo (pemilik data laundry contoh)
+        $demo = User::firstOrCreate(
+            ['username' => 'demo'],
+            ['name' => 'Laundry Demo', 'password' => Hash::make('demo123'), 'role' => 'member', 'is_active' => true]
+        );
+
+        // Settings platform (untuk landing/super admin) + settings member demo
+        Setting::withoutGlobalScopes()->firstOrCreate(['user_id' => null], ['value' => Settings::defaults()]);
+        Setting::withoutGlobalScopes()->firstOrCreate(['user_id' => $demo->id], ['value' => Settings::defaults()]);
+
         $services = [
             ['nama' => 'Cuci Setrika (Kg)',       'satuan' => 'kg',  'tarif' => 8000,  'kategori' => 'laundry', 'aktif' => true],
             ['nama' => 'Cuci Kering Saja (Kg)',   'satuan' => 'kg',  'tarif' => 6000,  'kategori' => 'laundry', 'aktif' => true],
@@ -29,7 +45,7 @@ class DatabaseSeeder extends Seeder
             ['nama' => 'Penjualan Sabun (Pcs)',   'satuan' => 'pcs', 'tarif' => 5000,  'kategori' => 'sabun',   'aktif' => true],
         ];
         foreach ($services as $s) {
-            Service::firstOrCreate(['nama' => $s['nama']], $s);
+            Service::withoutGlobalScopes()->firstOrCreate(['user_id' => $demo->id, 'nama' => $s['nama']], $s + ['user_id' => $demo->id]);
         }
 
         $customers = [
@@ -38,17 +54,7 @@ class DatabaseSeeder extends Seeder
             ['nama' => 'Agus Wijaya',  'no_hp' => '085711223344', 'alamat' => 'Kost Jaya Kamar 10, Jakarta', 'poin' => 0],
         ];
         foreach ($customers as $c) {
-            Customer::firstOrCreate(['no_hp' => $c['no_hp']], $c);
+            Customer::withoutGlobalScopes()->firstOrCreate(['user_id' => $demo->id, 'no_hp' => $c['no_hp']], $c + ['user_id' => $demo->id]);
         }
-
-        if (! Setting::query()->exists()) {
-            Setting::create(['value' => Settings::defaults()]);
-        }
-
-        // Default Super Admin login (ganti password setelah login pertama)
-        User::firstOrCreate(
-            ['username' => 'admin'],
-            ['name' => 'Administrator', 'password' => Hash::make('admin123'), 'role' => 'super_admin', 'is_active' => true]
-        );
     }
 }
