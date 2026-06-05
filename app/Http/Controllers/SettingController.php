@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Settings;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -14,6 +15,7 @@ class SettingController extends Controller
             'settings' => $settings,
             'colorPresets' => Settings::COLOR_PRESETS,
             'bgPresets' => Settings::BG_PRESETS,
+            'users' => User::orderBy('username')->get(),
         ]);
     }
 

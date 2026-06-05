@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Setting;
+use App\Models\User;
 use App\Support\Settings;
 
 class DatabaseSeeder extends Seeder
@@ -42,5 +44,11 @@ class DatabaseSeeder extends Seeder
         if (! Setting::query()->exists()) {
             Setting::create(['value' => Settings::defaults()]);
         }
+
+        // Default admin login (ganti password setelah login pertama)
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            ['name' => 'Administrator', 'password' => Hash::make('admin123')]
+        );
     }
 }

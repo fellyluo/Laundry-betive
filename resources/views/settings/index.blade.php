@@ -159,7 +159,99 @@
             </div>
         </div>
     </form>
+
+    <!-- Manajemen Pengguna -->
+    <div id="users" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 scroll-mt-20">
+        <div class="flex items-center justify-between border-b border-slate-850 pb-3">
+            <h3 class="font-bold text-white text-base flex items-center gap-2"><i data-lucide="users" class="h-5 w-5 text-accent"></i><span>Manajemen Pengguna</span></h3>
+            <span class="text-xs text-slate-500">{{ count($users) }} user</span>
+        </div>
+
+        @if(session('error'))
+            <div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs flex items-center gap-2"><i data-lucide="alert-triangle" class="h-4 w-4 shrink-0"></i><span>{{ session('error') }}</span></div>
+        @endif
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <!-- Daftar user -->
+            <div class="space-y-2.5">
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Daftar Pengguna</label>
+                @foreach($users as $u)
+                    <div class="p-3 bg-slate-950 border border-slate-850 rounded-xl flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-sm font-semibold text-slate-200 truncate flex items-center gap-2">
+                                {{ $u->username }}
+                                @if($u->id === auth()->id())<span class="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full border border-accent/20 font-bold uppercase">Anda</span>@endif
+                            </div>
+                            @if($u->name)<div class="text-[10px] text-slate-550 truncate">{{ $u->name }}</div>@endif
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick='openResetPass(@json($u->id), @json($u->username))' class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors" title="Ubah Password"><i data-lucide="key-round" class="h-4 w-4"></i></button>
+                            @if($u->id !== auth()->id())
+                            <form method="POST" action="{{ route('users.destroy', $u) }}" onsubmit="return confirm('Hapus user {{ $u->username }}?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="p-1.5 bg-slate-800/50 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition-colors" title="Hapus"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                            </form>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Tambah user -->
+            <form method="POST" action="{{ route('users.store') }}" class="space-y-3 bg-slate-950/40 border border-slate-850 rounded-xl p-4">
+                @csrf
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Tambah Pengguna Baru</label>
+                <div>
+                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama (opsional)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                </div>
+                <div>
+                    <input type="text" name="username" value="{{ old('username') }}" placeholder="Username *" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all font-mono">
+                </div>
+                <div>
+                    <input type="password" name="password" placeholder="Password * (min. 6)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                </div>
+                @if($errors->has('username') || $errors->has('password') || $errors->has('name'))
+                    <p class="text-xs text-rose-500">{{ $errors->first('username') ?: ($errors->first('password') ?: $errors->first('name')) }}</p>
+                @endif
+                <button type="submit" class="w-full py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2"><i data-lucide="user-plus" class="h-4 w-4"></i><span>Tambah User</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal ubah password user -->
+    <div id="resetPassModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+                <h2 class="text-base font-bold text-white">Ubah Password</h2>
+                <button type="button" onclick="closeResetPass()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="h-5 w-5"></i></button>
+            </div>
+            <form id="resetPassForm" method="POST" class="p-5 space-y-4">
+                @csrf @method('PUT')
+                <p class="text-xs text-slate-400">User: <span id="resetPassUser" class="font-bold text-slate-200 font-mono"></span></p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password Baru</label>
+                    <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full bg-slate-950 border border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none transition-all text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeResetPass()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-300 text-sm font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script>
+    const userBaseUrl = "{{ url('users') }}";
+    function openResetPass(id, username) {
+        document.getElementById('resetPassForm').action = userBaseUrl + '/' + id + '/password';
+        document.getElementById('resetPassUser').textContent = username;
+        const m = document.getElementById('resetPassModal'); m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function closeResetPass(){ const m=document.getElementById('resetPassModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+</script>
+@endpush
 
 @push('scripts')
 <script>

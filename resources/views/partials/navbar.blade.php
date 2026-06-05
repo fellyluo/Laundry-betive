@@ -27,9 +27,14 @@
             <span class="text-[8px] text-slate-550 uppercase tracking-widest font-bold mt-0.5 block leading-none">Premium Laundry</span>
         </div>
     </div>
-    <button onclick="toggleThemeMode()" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-slate-400 cursor-pointer" title="Ubah Tema">
-        @if($mode === 'light')<i data-lucide="sun" class="h-4.5 w-4.5 text-amber-500"></i>@else<i data-lucide="moon" class="h-4.5 w-4.5 text-accent"></i>@endif
-    </button>
+    <div class="flex items-center gap-2">
+        <button onclick="toggleThemeMode()" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-slate-400 cursor-pointer" title="Ubah Tema">
+            @if($mode === 'light')<i data-lucide="sun" class="h-4.5 w-4.5 text-amber-500"></i>@else<i data-lucide="moon" class="h-4.5 w-4.5 text-accent"></i>@endif
+        </button>
+        <form method="POST" action="{{ route('logout') }}">@csrf
+            <button type="submit" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-rose-500/40 hover:text-rose-400 transition-all text-slate-400 cursor-pointer" title="Keluar"><i data-lucide="log-out" class="h-4.5 w-4.5"></i></button>
+        </form>
+    </div>
 </header>
 
 <!-- Desktop Sidebar -->
@@ -65,6 +70,21 @@
                 <i data-lucide="moon" class="h-4 w-4"></i>
             </div>
         </button>
+    </div>
+
+    <div class="px-4 py-3 border-t border-slate-800/80">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-accent shrink-0"><i data-lucide="user" class="h-4 w-4"></i></div>
+                <div class="min-w-0 leading-tight">
+                    <div class="text-xs font-semibold text-slate-200 truncate max-w-[120px]">{{ optional(auth()->user())->username }}</div>
+                    <div class="text-[9px] text-slate-550 uppercase tracking-wider font-bold">Sedang masuk</div>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">@csrf
+                <button type="submit" class="p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-rose-500/40 hover:text-rose-400 text-slate-400 transition-all cursor-pointer" title="Keluar"><i data-lucide="log-out" class="h-4 w-4"></i></button>
+            </form>
+        </div>
     </div>
 
     <div class="p-4 border-t border-slate-800 text-center text-xs text-slate-500">
