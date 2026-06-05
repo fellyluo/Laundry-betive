@@ -43,66 +43,67 @@
         </a>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-accent/30 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
-            <div class="flex justify-between items-start gap-1">
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Laundry</p>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mt-1 group-hover:text-accent transition-colors truncate">{{ format_rupiah($revTodayLaundry) }}</h3>
-                </div>
+    <!-- Stats Cards (clickable → menuju bagiannya). Angka di baris sendiri (full width, tidak terpotong) -->
+    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4 lg:gap-6">
+        <a href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-accent/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Laundry</p>
                 <div class="p-2 bg-accent/10 text-accent rounded-lg group-hover:bg-accent/20 transition-colors shrink-0"><i data-lucide="wallet" class="h-4.5 w-4.5"></i></div>
             </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight group-hover:text-accent transition-colors">{{ format_rupiah($revTodayLaundry) }}</h3>
             <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
-                <i data-lucide="trending-up" class="h-3 w-3 text-accent"></i><span class="truncate">Jasa cuci hari ini</span>
+                <i data-lucide="trending-up" class="h-3 w-3 text-accent shrink-0"></i><span class="truncate">Jasa cuci hari ini</span>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
-            <div class="flex justify-between items-start gap-1">
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Sabun</p>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mt-1 group-hover:text-amber-400 transition-colors truncate">{{ format_rupiah($revTodaySabun) }}</h3>
-                </div>
+        <a href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Sabun</p>
                 <div class="p-2 bg-amber-500/10 text-amber-500 rounded-lg group-hover:bg-amber-500/20 transition-colors shrink-0"><i data-lucide="shopping-bag" class="h-4.5 w-4.5"></i></div>
             </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight group-hover:text-amber-400 transition-colors">{{ format_rupiah($revTodaySabun) }}</h3>
             <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
-                <i data-lucide="trending-up" class="h-3 w-3 text-amber-500"></i><span class="truncate">Jual sabun hari ini</span>
+                <i data-lucide="trending-up" class="h-3 w-3 text-amber-500 shrink-0"></i><span class="truncate">Jual sabun hari ini</span>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
-            <div class="flex justify-between items-start gap-1">
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Diproses</p>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mt-1 transition-colors">{{ $activeCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
-                </div>
+        <a href="{{ route('orders.index', ['status' => 'diproses']) }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Diproses</p>
                 <div class="p-2 bg-amber-600/10 text-amber-400 rounded-lg group-hover:bg-amber-600/20 transition-colors shrink-0"><i data-lucide="clock" class="h-4.5 w-4.5"></i></div>
             </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $activeCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
             <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Cucian sedang dicuci/setrika</div>
-        </div>
+        </a>
 
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-emerald-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
-            <div class="flex justify-between items-start gap-1">
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Siap Diambil</p>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mt-1 transition-colors">{{ $readyCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
-                </div>
+        <a href="{{ route('orders.index', ['status' => 'selesai']) }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-emerald-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Siap Diambil</p>
                 <div class="p-2 bg-emerald-600/10 text-emerald-400 rounded-lg group-hover:bg-emerald-600/20 transition-colors shrink-0"><i data-lucide="check-circle-2" class="h-4.5 w-4.5"></i></div>
             </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $readyCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
             <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Selesai &amp; siap diserahkan</div>
-        </div>
+        </a>
 
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-blue-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px] col-span-2 lg:col-span-1">
-            <div class="flex justify-between items-start gap-1">
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pelanggan</p>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mt-1 transition-colors">{{ $customersCount }} <span class="text-xs font-normal text-slate-400">Orang</span></h3>
-                </div>
+        <a href="{{ route('customers.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-blue-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pelanggan</p>
                 <div class="p-2 bg-blue-600/10 text-blue-400 rounded-lg group-hover:bg-blue-600/20 transition-colors shrink-0"><i data-lucide="users-2" class="h-4.5 w-4.5"></i></div>
             </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $customersCount }} <span class="text-xs font-normal text-slate-400">Orang</span></h3>
             <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Pelanggan terdaftar aktif</div>
-        </div>
+        </a>
+
+        <a href="{{ route('expenses.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-rose-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+            <div class="flex justify-between items-start gap-2">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pengeluaran</p>
+                <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg group-hover:bg-rose-500/20 transition-colors shrink-0"><i data-lucide="receipt" class="h-4.5 w-4.5"></i></div>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-rose-400 mt-1 leading-tight">{{ format_rupiah($expensesToday) }}</h3>
+            <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
+                <i data-lucide="trending-down" class="h-3 w-3 text-rose-400 shrink-0"></i><span class="truncate">Biaya hari ini</span>
+            </div>
+        </a>
     </div>
 
     @if($orders->isEmpty())
@@ -165,6 +166,25 @@
                                 @if($diffM > 0)<span class="text-emerald-400 font-semibold shrink-0">+{{ $pctM }}%</span>
                                 @elseif($diffM < 0)<span class="text-rose-400 font-semibold shrink-0">{{ $pctM }}%</span>
                                 @else<span class="text-slate-500 font-semibold shrink-0">0%</span>@endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Keuangan Bulan Ini: Pendapatan - Pengeluaran = Laba Bersih -->
+                    <div class="pt-4 border-t border-slate-800/60 space-y-2">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="wallet" class="h-3.5 w-3.5 text-accent"></i><span>Keuangan Bulan Ini (Laba Bersih)</span></h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan</span>
+                                <div class="text-sm sm:text-base font-bold text-emerald-450 mt-1 truncate">{{ format_rupiah($revThisMonth) }}</div>
+                            </div>
+                            <a href="{{ route('expenses.index') }}" class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl hover:border-rose-500/30 transition-all block">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pengeluaran</span>
+                                <div class="text-sm sm:text-base font-bold text-rose-400 mt-1 truncate">{{ format_rupiah($expensesThisMonth) }}</div>
+                            </a>
+                            <div class="p-3 bg-slate-950/40 border rounded-xl {{ $netThisMonth >= 0 ? 'border-emerald-500/20' : 'border-rose-500/20' }}">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Laba Bersih</span>
+                                <div class="text-sm sm:text-base font-black mt-1 truncate {{ $netThisMonth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">{{ format_rupiah($netThisMonth) }}</div>
                             </div>
                         </div>
                     </div>
@@ -251,9 +271,12 @@
             <!-- Right column -->
             <div class="space-y-8">
                 <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
-                    <div>
-                        <h3 class="font-bold text-lg text-white">Layanan Terpopuler</h3>
-                        <p class="text-slate-400 text-xs mt-0.5">Layanan paling sering dipesan</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">Layanan Terpopuler</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Layanan paling sering dipesan</p>
+                        </div>
+                        <a href="{{ route('services.index') }}" class="text-xs text-accent hover:text-accent/90 flex items-center gap-1 font-semibold shrink-0"><span>Kelola</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a>
                     </div>
                     @if(empty($popular))
                         <p class="text-slate-500 text-sm py-4 text-center">Belum ada statistik layanan</p>
@@ -298,14 +321,14 @@
                         <p class="text-slate-400 text-xs mt-0.5">Pembagian tagihan transaksi saat ini</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-center">
-                        <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                        <a href="{{ route('orders.index', ['bayar' => 'belum']) }}" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl block hover:-translate-y-0.5 transition-all">
                             <div class="text-xs text-rose-400 font-semibold">Belum Bayar</div>
                             <div class="text-lg font-black text-white mt-1">{{ $belumCount }}</div>
-                        </div>
-                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                        </a>
+                        <a href="{{ route('orders.index', ['bayar' => 'lunas']) }}" class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl block hover:-translate-y-0.5 transition-all">
                             <div class="text-xs text-emerald-400 font-semibold">Lunas</div>
                             <div class="text-lg font-black text-white mt-1">{{ $lunasCount }}</div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>

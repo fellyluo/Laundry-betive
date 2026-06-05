@@ -153,6 +153,16 @@
         document.getElementById('orderBayar').value = 'semua';
         filterOrders();
     }
+    // Pre-filter from URL query (?status=..&bayar=..&q=..) — dipakai oleh kartu Dashboard
+    (function () {
+        const p = new URLSearchParams(window.location.search);
+        const st = p.get('status'), by = p.get('bayar'), q = p.get('q');
+        const stEl = document.getElementById('orderStatus'), byEl = document.getElementById('orderBayar'), qEl = document.getElementById('orderSearch');
+        if (st && stEl && [...stEl.options].some(o => o.value === st)) stEl.value = st;
+        if (by && byEl && [...byEl.options].some(o => o.value === by)) byEl.value = by;
+        if (q && qEl) qEl.value = q;
+        if (st || by || q) filterOrders();
+    })();
 </script>
 @endpush
 @endsection

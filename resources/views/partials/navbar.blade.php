@@ -11,6 +11,7 @@
         ['name' => 'Order Baru', 'route' => 'orders.create',   'href' => route('orders.create'),'icon' => 'plus-circle',    'active' => request()->is('orders/baru'), 'highlight' => true],
         ['name' => 'Pelanggan',  'route' => 'customers.index', 'href' => route('customers.index'),'icon' => 'users',        'active' => request()->is('customers*')],
         ['name' => 'Layanan',    'route' => 'services.index',  'href' => route('services.index'),'icon' => 'washing-machine','active' => request()->is('services*')],
+        ['name' => 'Pengeluaran','route' => 'expenses.index',  'href' => route('expenses.index'),'icon' => 'receipt',       'active' => request()->is('expenses*')],
         ['name' => 'Pengaturan', 'route' => 'settings.index',  'href' => route('settings.index'),'icon' => 'settings',      'active' => request()->is('settings*')],
     ];
 @endphp
@@ -82,9 +83,9 @@
                 <span class="text-[10px] mt-1 text-accent font-medium">{{ $item['name'] }}</span>
             </a>
         @else
-            <a href="{{ $item['href'] }}" class="flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all duration-200 {{ $item['active'] ? 'text-accent-soft font-semibold' : 'text-slate-400' }}">
-                <i data-lucide="{{ $item['icon'] }}" class="h-5 w-5"></i>
-                <span class="text-[10px] mt-1">{{ $item['name'] }}</span>
+            <a href="{{ $item['href'] }}" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1 rounded-xl transition-all duration-200 {{ $item['active'] ? 'text-accent-soft font-semibold' : 'text-slate-400' }}">
+                <i data-lucide="{{ $item['icon'] }}" class="h-5 w-5 shrink-0"></i>
+                <span class="text-[9px] mt-1 truncate max-w-full px-0.5">{{ $item['name'] }}</span>
             </a>
         @endif
     @endforeach

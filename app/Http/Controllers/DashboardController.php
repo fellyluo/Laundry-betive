@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Service;
+use App\Models\Expense;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -117,6 +118,13 @@ class DashboardController extends Controller
         $belumCount = $orders->whereIn('status_bayar', ['belum', 'dp'])->count();
         $lunasCount = $orders->where('status_bayar', 'lunas')->count();
 
+        // Expenses (pengeluaran) + net profit
+        $expensesToday = (int) Expense::whereDate('tanggal', $today)->sum('jumlah');
+        $expensesThisMonth = (int) Expense::whereYear('tanggal', $today->year)
+            ->whereMonth('tanggal', $today->month)->sum('jumlah');
+        $netToday = ($revTodayLaundry + $revTodaySabun) - $expensesToday;
+        $netThisMonth = $revThisMonth - $expensesThisMonth;
+
         return view('dashboard', [
             'orders' => $orders,
             'recentOrders' => $orders->take(5),
@@ -135,6 +143,10 @@ class DashboardController extends Controller
             'soapRevenue' => $soapRevenue,
             'belumCount' => $belumCount,
             'lunasCount' => $lunasCount,
+            'expensesToday' => $expensesToday,
+            'expensesThisMonth' => $expensesThisMonth,
+            'netToday' => $netToday,
+            'netThisMonth' => $netThisMonth,
         ]);
     }
 

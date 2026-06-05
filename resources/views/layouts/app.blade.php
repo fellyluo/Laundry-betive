@@ -39,7 +39,7 @@
             },
         };
     </script>
-    <link rel="stylesheet" href="/css/app.css?v=4">
+    <link rel="stylesheet" href="/css/app.css?v=5">
     <style>
         :root {
             --accent-font: {{ $appTheme['accent_font'] ?? '#0d9488' }};

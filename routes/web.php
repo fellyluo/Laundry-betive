@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\SettingController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -29,6 +30,11 @@ Route::post('/services', [ServiceController::class, 'store'])->name('services.st
 Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
 Route::post('/services/{service}/toggle', [ServiceController::class, 'toggle'])->name('services.toggle');
 Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+
+// Expenses
+Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
 // Settings
 Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
