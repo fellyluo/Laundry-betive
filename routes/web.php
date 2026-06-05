@@ -12,6 +12,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\LandingController;
+
+// ---- Landing page (publik) ----
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 // ---- Public self-registration (pelanggan scan QR — tanpa login) ----
 Route::get('/daftar', [RegistrationController::class, 'show'])->name('register.show');
@@ -43,7 +47,7 @@ Route::middleware('auth')->group(function () {
 
     // App utama — diblokir otomatis jika langganan member habis / di-suspend
     Route::middleware('subscription')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

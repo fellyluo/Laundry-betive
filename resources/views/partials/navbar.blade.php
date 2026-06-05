@@ -6,7 +6,7 @@
     $mode = $appTheme['mode'] ?? 'dark';
 
     $nav = [
-        ['name' => 'Dashboard',  'route' => 'dashboard',       'href' => url('/'),            'icon' => 'home',            'active' => request()->routeIs('dashboard')],
+        ['name' => 'Dashboard',  'route' => 'dashboard',       'href' => route('dashboard'),  'icon' => 'home',            'active' => request()->routeIs('dashboard')],
         ['name' => 'Order',      'route' => 'orders.index',    'href' => route('orders.index'), 'icon' => 'clipboard-list', 'active' => request()->is('orders') || request()->is('orders/*')],
         ['name' => 'Order Baru', 'route' => 'orders.create',   'href' => route('orders.create'),'icon' => 'plus-circle',    'active' => request()->is('orders/baru'), 'highlight' => true],
         ['name' => 'Pelanggan',  'route' => 'customers.index', 'href' => route('customers.index'),'icon' => 'users',        'active' => request()->is('customers*')],
