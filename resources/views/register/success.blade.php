@@ -18,6 +18,22 @@
         @if($customer->metode_bayar)<div class="flex justify-between gap-3"><span class="text-slate-500">Metode Bayar</span><span class="font-semibold text-accent">{{ $customer->metode_bayar }}</span></div>@endif
     </div>
 
+    @if(isset($order) && $order)
+        <div class="text-left bg-accent/5 border border-accent/20 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="clipboard-list" class="h-4 w-4"></i>Pesanan Diterima</span>
+                <span class="font-mono text-xs font-bold text-slate-200">{{ $order->nomor_nota }}</span>
+            </div>
+            <div class="space-y-1 pt-1">
+                @foreach($order->items as $it)
+                    <div class="flex justify-between text-xs text-slate-300"><span>{{ $it->service->nama ?? 'Layanan' }} <span class="text-slate-500">({{ rtrim(rtrim(number_format($it->qty,2,'.',''),'0'),'.') }} {{ $it->service->satuan ?? '' }})</span></span><span class="font-mono">{{ format_rupiah($it->subtotal) }}</span></div>
+                @endforeach
+            </div>
+            <div class="flex justify-between text-sm font-bold text-white border-t border-accent/20 pt-2"><span>Estimasi Total</span><span class="text-accent">{{ format_rupiah($order->total) }}</span></div>
+            <p class="text-[10px] text-slate-500">Estimasi — total final dihitung setelah ditimbang di outlet. Estimasi selesai: {{ format_date($order->estimasi_selesai, true) }}.</p>
+        </div>
+    @endif
+
     <p class="text-[11px] text-slate-500">Tunjukkan halaman ini ke kasir, atau sebutkan nama/HP Anda saat datang. Selamat datang sebagai member! 🎉</p>
 
     <a href="{{ route('register.show') }}" class="inline-block text-xs text-accent hover:text-accent/90 font-semibold">Daftarkan pelanggan lain &rarr;</a>

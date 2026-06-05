@@ -86,6 +86,7 @@
                         <div class="space-y-1">
                             <div class="font-mono font-bold text-slate-350 tracking-wide text-sm flex items-center gap-2">
                                 <span>{{ $order->nomor_nota }}</span>
+                                @if(str_contains((string) $order->catatan, 'via QR'))<span class="px-1.5 py-0.5 bg-accent/10 text-accent border border-accent/20 rounded-full text-[9px] font-bold inline-flex items-center gap-1" title="Pesanan mandiri via QR"><i data-lucide="qr-code" class="h-2.5 w-2.5"></i>QR</span>@endif
                                 <span class="md:hidden flex items-center gap-1">
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold capitalize {{ ord_status_badge($order->status) }}">{{ $order->status }}</span>
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold capitalize {{ pay_status_badge($order->status_bayar) }}">{{ $order->status_bayar }}</span>
