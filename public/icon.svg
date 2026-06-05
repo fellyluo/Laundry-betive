@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#14b8a6" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <rect x="120" y="100" width="272" height="312" rx="24" fill="#f8fafc" stroke="url(#accentGrad)" stroke-width="12" />
+  <rect x="140" y="120" width="232" height="50" rx="8" fill="#e2e8f0" />
+  <circle cx="170" cy="145" r="12" fill="url(#accentGrad)" />
+  <rect x="290" y="133" width="60" height="24" rx="4" fill="#0f172a" />
+  <circle cx="340" cy="145" r="3" fill="#ef4444" />
+  <circle cx="256" cy="285" r="85" fill="#e2e8f0" stroke="url(#accentGrad)" stroke-width="10" />
+  <circle cx="256" cy="285" r="65" fill="#38bdf8" opacity="0.8" />
+  <path d="M 195 295 Q 220 280 245 295 T 295 295 Q 310 300 317 295 L 317 350 L 195 350 Z" fill="#0284c7" opacity="0.6" />
+  <circle cx="220" cy="250" r="10" fill="#ffffff" opacity="0.9" />
+  <circle cx="280" cy="240" r="6" fill="#ffffff" opacity="0.9" />
+  <circle cx="290" cy="270" r="8" fill="#ffffff" opacity="0.9" />
+  <circle cx="205" cy="280" r="5" fill="#ffffff" opacity="0.9" />
+</svg>

@@ -1,0 +1,169 @@
+/* ===== LaundryPro — ported global styles (no build step) ===== */
+
+:root {
+  --background: #0b0f19;        /* premium deep slate */
+  --foreground: #f8fafc;
+  --accent-font: #0d9488;
+  --accent-bg: #0d9488;
+  --accent-hover-bg: #0f766e;
+}
+
+:root:not(.dark) {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ---- Accent mapping (custom utility classes) ---- */
+.text-accent { color: var(--accent-font) !important; }
+/* Softer, deeper accent — used for active sidebar items so they read elegant, not glaring */
+.text-accent-soft { color: var(--accent-hover-bg) !important; }
+.text-accent\/90 { color: color-mix(in srgb, var(--accent-font) 90%, transparent) !important; }
+.text-accent\/80 { color: color-mix(in srgb, var(--accent-font) 80%, transparent) !important; }
+.hover\:text-accent:hover { color: var(--accent-font) !important; }
+.group:hover .group-hover\:text-accent { color: var(--accent-font) !important; }
+
+.bg-accent { background-color: var(--accent-bg) !important; }
+.bg-accent\/5 { background-color: color-mix(in srgb, var(--accent-bg) 5%, transparent) !important; }
+.bg-accent\/10 { background-color: color-mix(in srgb, var(--accent-bg) 10%, transparent) !important; }
+.bg-accent\/20 { background-color: color-mix(in srgb, var(--accent-bg) 20%, transparent) !important; }
+.hover\:bg-accent\/10:hover { background-color: color-mix(in srgb, var(--accent-bg) 10%, transparent) !important; }
+.hover\:bg-accent\/20:hover { background-color: color-mix(in srgb, var(--accent-bg) 20%, transparent) !important; }
+.hover\:bg-accent\/90:hover { background-color: color-mix(in srgb, var(--accent-bg) 90%, transparent) !important; }
+.group:hover .group-hover\:bg-accent\/20 { background-color: color-mix(in srgb, var(--accent-bg) 20%, transparent) !important; }
+.hover\:bg-accent:hover { background-color: var(--accent-bg) !important; }
+.hover\:bg-accent-hover:hover { background-color: var(--accent-hover-bg) !important; }
+
+.border-accent { border-color: var(--accent-bg) !important; }
+.border-accent\/20 { border-color: color-mix(in srgb, var(--accent-bg) 20%, transparent) !important; }
+.border-accent\/30 { border-color: color-mix(in srgb, var(--accent-bg) 30%, transparent) !important; }
+.focus\:border-accent:focus { border-color: var(--accent-bg) !important; }
+.hover\:border-accent\/30:hover { border-color: color-mix(in srgb, var(--accent-bg) 30%, transparent) !important; }
+
+/* ---- Entrance animation shim (replaces tailwindcss-animate) ---- */
+@keyframes lp-enter {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.animate-in { animation: lp-enter 0.15s ease-out both; }
+
+/* ---- Safe area for mobile notch ---- */
+.safe-bottom { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
+
+/* ---- Readability: small captions/labels bolder & higher-contrast ---- */
+.text-xs, .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\] { font-weight: 600 !important; }
+/* Preserve intentionally-heavier weights (rule above must not downgrade them) */
+.font-bold { font-weight: 700 !important; }
+.font-extrabold { font-weight: 800 !important; }
+.font-black { font-weight: 900 !important; }
+/* Lift dim muted text in dark mode so small sentences stand out */
+.dark .text-slate-550 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #8b9bb0 !important; }
+.dark .text-slate-600 { color: #7c8a9e !important; }
+
+/* ======================= LIGHT MODE OVERRIDES ======================= */
+:root:not(.dark) .bg-slate-950,
+:root:not(.dark) .bg-slate-900,
+:root:not(.dark) .bg-slate-900\/60,
+:root:not(.dark) .bg-slate-900\/40 { background-color: #ffffff !important; }
+:root:not(.dark) .bg-slate-850,
+:root:not(.dark) .bg-slate-800 { background-color: #f1f5f9 !important; }
+:root:not(.dark) .bg-slate-800\/50 { background-color: #f8fafc !important; }
+:root:not(.dark) .bg-slate-800\/10 { background-color: rgba(226, 232, 240, 0.4) !important; }
+:root:not(.dark) .bg-slate-950\/80,
+:root:not(.dark) .bg-slate-950\/70,
+:root:not(.dark) .bg-slate-950\/60,
+:root:not(.dark) .bg-slate-950\/50,
+:root:not(.dark) .bg-slate-950\/40,
+:root:not(.dark) .bg-slate-950\/30,
+:root:not(.dark) .bg-slate-900\/50,
+:root:not(.dark) .bg-slate-900\/30,
+:root:not(.dark) .bg-slate-955,
+:root:not(.dark) .bg-slate-955\/60,
+:root:not(.dark) .bg-slate-955\/40 { background-color: #f8fafc !important; }
+:root:not(.dark) .hover\:bg-slate-800\/50:hover { background-color: #f1f5f9 !important; }
+:root:not(.dark) .hover\:bg-slate-700:hover { background-color: #e2e8f0 !important; }
+
+:root:not(.dark) .text-white,
+:root:not(.dark) .text-slate-100 { color: #0f172a !important; }
+:root:not(.dark) .text-slate-200 { color: #1e293b !important; }
+:root:not(.dark) .text-slate-300,
+:root:not(.dark) .text-slate-350 { color: #334155 !important; }
+:root:not(.dark) .text-slate-400,
+:root:not(.dark) .text-slate-405,
+:root:not(.dark) .text-slate-450,
+:root:not(.dark) .text-slate-600 { color: #475569 !important; }
+:root:not(.dark) .text-slate-500 { color: #475569 !important; }
+:root:not(.dark) .text-slate-550 { color: #475569 !important; }
+:root:not(.dark) .text-slate-600 { color: #334155 !important; }
+:root:not(.dark) .placeholder-slate-550::placeholder,
+:root:not(.dark) .placeholder-slate-600::placeholder,
+:root:not(.dark) .placeholder-slate-500::placeholder,
+:root:not(.dark) .placeholder-slate-650::placeholder { color: #94a3b8 !important; }
+
+:root:not(.dark) .border-slate-900,
+:root:not(.dark) .border-slate-800,
+:root:not(.dark) .border-slate-800\/80,
+:root:not(.dark) .border-slate-700,
+:root:not(.dark) .border-slate-750\/30 { border-color: #e2e8f0 !important; }
+:root:not(.dark) .border-slate-850,
+:root:not(.dark) .border-slate-855 { border-color: #cbd5e1 !important; }
+:root:not(.dark) nav.md\:hidden .border-slate-900 { border-color: #ffffff !important; }
+
+:root:not(.dark) input[type="text"],
+:root:not(.dark) input[type="number"],
+:root:not(.dark) input[type="tel"],
+:root:not(.dark) input[type="date"],
+:root:not(.dark) input[type="datetime-local"],
+:root:not(.dark) select,
+:root:not(.dark) textarea,
+:root:not(.dark) input { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+:root:not(.dark) input::placeholder,
+:root:not(.dark) textarea::placeholder { color: #94a3b8 !important; }
+:root:not(.dark) select option { background-color: #ffffff !important; color: #0f172a !important; }
+
+:root:not(.dark) .bg-blue-500\/10 { background-color: #eff6ff !important; }
+:root:not(.dark) .bg-indigo-500\/10 { background-color: #eef2ff !important; }
+:root:not(.dark) .bg-emerald-500\/10 { background-color: #ecfdf5 !important; }
+:root:not(.dark) .bg-rose-500\/10 { background-color: #fff1f2 !important; }
+:root:not(.dark) .bg-amber-500\/10 { background-color: #fffbeb !important; }
+:root:not(.dark) .bg-slate-500\/10 { background-color: #f1f5f9 !important; }
+:root:not(.dark) .bg-black\/80 { background-color: rgba(15, 23, 42, 0.5) !important; }
+:root:not(.dark) .hover\:bg-slate-800\/10:hover { background-color: #f1f5f9 !important; }
+
+:root:not(.dark) .text-amber-400,
+:root:not(.dark) .text-amber-450 { color: #b45309 !important; }
+:root:not(.dark) .text-emerald-400,
+:root:not(.dark) .text-emerald-450 { color: #047857 !important; }
+:root:not(.dark) .text-blue-400 { color: #1d4ed8 !important; }
+:root:not(.dark) .text-rose-400,
+:root:not(.dark) .text-rose-450 { color: #be123c !important; }
+:root:not(.dark) .text-indigo-400 { color: #4338ca !important; }
+
+/* ======================= PRINT ======================= */
+@media screen {
+  .print-only { display: none !important; }
+}
+@media print {
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12px;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+  .no-print { display: none !important; }
+  .print-area {
+    display: block !important;
+    position: static !important;
+    margin: 0 auto !important;
+    padding: 10px !important;
+  }
+  @page { margin: 0; }
+}
