@@ -3,12 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class MemberController extends Controller
 {
+    /** Halaman pengaturan platform super admin (logo, nama, tema) + akun. */
+    public function settings()
+    {
+        $settings = Settings::get(null); // platform (user_id null)
+        return view('superadmin.settings', [
+            'settings' => $settings,
+            'colorPresets' => Settings::COLOR_PRESETS,
+            'bgPresets' => Settings::BG_PRESETS,
+        ]);
+    }
+
+    public function saveSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_laundry' => 'required|string|max:255',
+            'logo_emoji' => 'nullable|string|max:8',
+            'logo_url' => 'nullable|string',
+            'theme_color' => 'required|string',
+            'theme_color_font' => 'nullable|string',
+            'theme_color_bg' => 'nullable|string',
+            'theme_bg' => 'required|string',
+        ], ['nama_laundry.required' => 'Nama platform tidak boleh kosong.']);
+
+        $current = Settings::get(null);
+
+        Settings::save([
+            'branding' => [
+                'nama_laundry' => trim($validated['nama_laundry']),
+                'logo_emoji' => trim($validated['logo_emoji'] ?? '') ?: '🧺',
+                'logo_url' => ! empty($validated['logo_url']) ? $validated['logo_url'] : null,
+                'alamat_laundry' => $current['branding']['alamat_laundry'] ?? null,
+                'no_telp_laundry' => $current['branding']['no_telp_laundry'] ?? null,
+            ],
+            'theme_color' => $validated['theme_color'],
+            'theme_color_font' => $validated['theme_color_font'] ?? '#0d9488',
+            'theme_color_bg' => $validated['theme_color_bg'] ?? '#0d9488',
+            'theme_bg' => $validated['theme_bg'],
+            'theme_mode' => $current['theme_mode'] ?? 'dark',
+            'payment_methods' => $current['payment_methods'] ?? Settings::defaults()['payment_methods'],
+        ], null);
+
+        return redirect()->route('platform.settings')->with('success', 'Pengaturan platform berhasil disimpan.');
+    }
+
     public function index()
     {
         $members = User::orderByRaw("CASE WHEN role='super_admin' THEN 0 ELSE 1 END")
@@ -50,7 +95,7 @@ class MemberController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('members.index')->with('success', 'Profil Anda berhasil diperbarui.');
+        return back()->with('success', 'Profil Anda berhasil diperbarui.');
     }
 
     public function store(Request $request)

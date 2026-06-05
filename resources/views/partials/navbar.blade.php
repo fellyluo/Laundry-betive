@@ -10,8 +10,9 @@
     if ($isSuper) {
         // Super admin: hanya Dashboard (monitoring) + Member
         $nav = [
-            ['name' => 'Dashboard', 'href' => route('dashboard'),    'icon' => 'layout-dashboard', 'active' => request()->is('dashboard')],
-            ['name' => 'Member',    'href' => route('members.index'),'icon' => 'shield-check',     'active' => request()->is('members*')],
+            ['name' => 'Dashboard',  'href' => route('dashboard'),       'icon' => 'layout-dashboard', 'active' => request()->is('dashboard')],
+            ['name' => 'Member',     'href' => route('members.index'),   'icon' => 'shield-check',     'active' => request()->is('members*')],
+            ['name' => 'Pengaturan', 'href' => route('platform.settings'),'icon' => 'settings',       'active' => request()->is('pengaturan')],
         ];
     } else {
         // Member: operasional laundry

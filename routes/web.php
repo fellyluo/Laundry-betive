@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     // Halaman blokir langganan (tanpa gating 'subscription')
     Route::get('/langganan', [SubscriptionController::class, 'blocked'])->name('langganan.blocked');
 
+    // Toggle mode tema (semua user login: super admin -> platform settings, member -> miliknya)
+    Route::post('/settings/theme-mode', [SettingController::class, 'themeMode'])->name('settings.themeMode');
+
     // Super Admin: kelola member & langganan
     Route::middleware('superadmin')->group(function () {
         Route::get('/members', [MemberController::class, 'index'])->name('members.index');
@@ -48,6 +51,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/members/{user}/toggle', [MemberController::class, 'toggle'])->name('members.toggle');
         Route::put('/members/{user}/password', [MemberController::class, 'password'])->name('members.password');
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
+
+        // Pengaturan platform super admin (logo, nama, tema) + akun
+        Route::get('/pengaturan', [MemberController::class, 'settings'])->name('platform.settings');
+        Route::post('/pengaturan', [MemberController::class, 'saveSettings'])->name('platform.settings.save');
     });
 
     Route::middleware('subscription')->group(function () {
@@ -87,7 +94,6 @@ Route::middleware('auth')->group(function () {
             // Settings (laundry)
             Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
             Route::post('/settings', [SettingController::class, 'save'])->name('settings.save');
-            Route::post('/settings/theme-mode', [SettingController::class, 'themeMode'])->name('settings.themeMode');
         });
     });
 });
