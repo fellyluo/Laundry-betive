@@ -108,7 +108,16 @@
                             <span class="px-3 py-1 rounded-full text-xs font-bold text-center capitalize {{ ord_status_badge($order->status) }}">{{ $order->status }}</span>
                             <span class="px-3 py-0.5 rounded-full text-[10px] font-bold text-center capitalize {{ pay_status_badge($order->status_bayar) }}">{{ $order->status_bayar }}</span>
                         </div>
-                        <a href="{{ route('orders.show', $order) }}" class="flex items-center gap-1 bg-slate-800 hover:bg-accent hover:text-white text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 text-xs shadow-md border border-slate-750/30 shrink-0"><span>Detail</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            @if(! in_array($order->status, ['diambil', 'dibatalkan']))
+                                <a href="{{ route('orders.edit', $order) }}" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all border border-slate-750/30" title="Edit Order"><i data-lucide="pencil" class="h-4 w-4"></i></a>
+                                <form method="POST" action="{{ route('orders.status', $order) }}" onsubmit="return confirm('Batalkan order {{ $order->nomor_nota }}?')">
+                                    @csrf<input type="hidden" name="status" value="dibatalkan">
+                                    <button type="submit" class="p-2.5 bg-slate-800/50 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-xl transition-all border border-slate-750/30" title="Batalkan Order"><i data-lucide="ban" class="h-4 w-4"></i></button>
+                                </form>
+                            @endif
+                            <a href="{{ route('orders.show', $order) }}" class="flex items-center gap-1 bg-slate-800 hover:bg-accent hover:text-white text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 text-xs shadow-md border border-slate-750/30"><span>Detail</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a>
+                        </div>
                     </div>
                 </div>
             @endforeach

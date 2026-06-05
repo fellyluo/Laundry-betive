@@ -58,6 +58,9 @@
                 </form>
             @endif
 
+            @if(! in_array($order->status, ['diambil', 'dibatalkan']))
+            <a href="{{ route('orders.edit', $order) }}" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-teal-700/20 hover:text-accent text-slate-200 font-bold px-4 py-3 rounded-xl transition-all border border-slate-750/30" title="Edit Order"><i data-lucide="pencil" class="h-4.5 w-4.5 text-amber-400"></i><span class="text-xs">Edit</span></a>
+            @endif
             <button onclick="sendWhatsApp()" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-teal-700/20 hover:text-accent text-slate-200 font-bold px-4 py-3 rounded-xl transition-all border border-slate-750/30" title="Kirim Pesan WhatsApp"><i data-lucide="send" class="h-4.5 w-4.5 text-emerald-550"></i><span class="text-xs">Kirim WA</span></button>
             <button onclick="window.print()" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-teal-700/20 hover:text-accent text-slate-200 font-bold px-4 py-3 rounded-xl transition-all border border-slate-750/30" title="Cetak Nota"><i data-lucide="printer" class="h-4.5 w-4.5 text-slate-400"></i><span class="text-xs">Cetak Struk</span></button>
         </div>

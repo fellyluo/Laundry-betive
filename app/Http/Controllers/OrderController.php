@@ -132,6 +132,79 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order);
     }
 
+    public function edit(Order $order)
+    {
+        if (in_array($order->status, ['diambil', 'dibatalkan'])) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Order yang sudah diambil/dibatalkan tidak bisa diedit.');
+        }
+
+        $order->load(['customer', 'items.service']);
+        $customers = Customer::orderByDesc('created_at')->get();
+
+        // Layanan aktif + layanan yang sudah dipakai di order (walau non-aktif) agar tetap tampil
+        $active = Service::where('aktif', true)->orderBy('nama')->get();
+        $usedIds = $order->items->pluck('service_id')->filter()->all();
+        $used = Service::whereIn('id', $usedIds)->get();
+        $services = $active->concat($used)->unique('id')->sortBy('nama')->values();
+
+        return view('orders.edit', compact('order', 'customers', 'services'));
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        if (in_array($order->status, ['diambil', 'dibatalkan'])) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Order yang sudah diambil/dibatalkan tidak bisa diedit.');
+        }
+
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'estimasi_selesai' => 'required|date',
+            'catatan' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.qty' => 'required|numeric|min:0.01',
+        ], [
+            'customer_id.required' => 'Silakan pilih pelanggan terlebih dahulu.',
+            'items.required' => 'Silakan tambahkan minimal 1 layanan dengan kuantitas yang valid.',
+            'estimasi_selesai.required' => 'Silakan tentukan estimasi selesai laundry.',
+        ]);
+
+        DB::transaction(function () use ($validated, $order) {
+            $services = Service::whereIn('id', collect($validated['items'])->pluck('service_id'))->get()->keyBy('id');
+            $total = 0;
+            $rows = [];
+            foreach ($validated['items'] as $row) {
+                $svc = $services[$row['service_id']] ?? null;
+                if (! $svc) {
+                    continue;
+                }
+                $qty = (float) $row['qty'];
+                $harga = (int) $svc->tarif;
+                $subtotal = (int) round($qty * $harga);
+                $total += $subtotal;
+                $rows[] = ['service_id' => $svc->id, 'qty' => $qty, 'harga_satuan' => $harga, 'subtotal' => $subtotal];
+            }
+
+            $order->items()->delete();
+            foreach ($rows as $r) {
+                $order->items()->create($r);
+            }
+
+            $paid = (int) $order->payments()->sum('jumlah');
+            $order->update([
+                'customer_id' => $validated['customer_id'],
+                'estimasi_selesai' => Carbon::parse($validated['estimasi_selesai']),
+                'catatan' => $validated['catatan'] ?? null,
+                'total' => $total,
+                'status_bayar' => $paid >= $total && $total > 0 ? 'lunas' : 'belum',
+            ]);
+        });
+
+        return redirect()->route('orders.show', $order)->with('success', 'Order berhasil diperbarui.');
+    }
+
     public function show(Order $order)
     {
         $order->load(['customer', 'items.service', 'payments', 'logs']);
