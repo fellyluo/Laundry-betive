@@ -19,14 +19,35 @@
     <link rel="stylesheet" href="/css/app.css?v=5">
     <style>
         :root { --accent-font: {{ $appTheme['accent_font'] ?? '#0d9488' }}; --accent-bg: {{ $appTheme['accent_bg'] ?? '#0d9488' }}; --accent-hover-bg: {{ $appTheme['accent_hover'] ?? '#0f766e' }}; --background: {{ $appTheme['background'] ?? '#0b0f19' }}; }
-        .hero-glow { background: radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--accent-bg) 22%, transparent), transparent 70%); }
-        .accent-grad { background: linear-gradient(135deg, var(--accent-bg), color-mix(in srgb, var(--accent-bg) 55%, #38bdf8)); }
         html { scroll-behavior: smooth; }
         .feature-card:hover { transform: translateY(-4px); }
         .feature-card { transition: transform .2s ease, border-color .2s ease; }
+
+        /* ===== Soft & transparan (glassmorphism) — berlaku light & dark ===== */
+        .hero-glow { background: radial-gradient(60% 45% at 50% 0%, color-mix(in srgb, var(--accent-bg) 10%, transparent), transparent 72%); }
+        .accent-grad { background: linear-gradient(135deg, color-mix(in srgb, var(--accent-bg) 60%, transparent), color-mix(in srgb, var(--accent-bg) 20%, transparent)); }
+
+        /* Permukaan kartu/section jadi kaca transparan + blur (override gaya solid app.css via #lp) */
+        #lp .bg-slate-900, #lp .bg-slate-900\/70, #lp .bg-slate-900\/60, #lp .bg-slate-900\/40, #lp .bg-slate-900\/30 {
+            background-color: color-mix(in srgb, var(--background) 55%, transparent) !important;
+            -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+        }
+        #lp .bg-slate-950\/70, #lp .bg-slate-950\/50, #lp .bg-slate-950\/60 {
+            background-color: color-mix(in srgb, var(--background) 40%, transparent) !important;
+        }
+        /* Border lebih lembut (tinta aksen tipis) */
+        #lp .border-slate-800, #lp .border-slate-800\/70, #lp .border-slate-800\/80, #lp .border-slate-850, #lp .border-slate-750\/40, #lp .border-slate-750\/30 {
+            border-color: color-mix(in srgb, var(--accent-bg) 13%, transparent) !important;
+        }
+        /* Tombol & chip sekunder lebih lembut */
+        #lp .bg-slate-800 { background-color: color-mix(in srgb, var(--accent-bg) 9%, transparent) !important; }
+        #lp .border { border-width: 1px; }
+        /* Aksen tipis & lembut */
+        #lp .bg-accent\/10 { background-color: color-mix(in srgb, var(--accent-bg) 8%, transparent) !important; }
+        #lp .border-accent\/20 { border-color: color-mix(in srgb, var(--accent-bg) 16%, transparent) !important; }
     </style>
 </head>
-<body class="min-h-full font-sans text-slate-100" style="background-color: var(--background);">
+<body id="lp" class="min-h-full font-sans text-slate-100" style="background-color: var(--background);">
 
     <!-- Navbar -->
     <header class="sticky top-0 z-40 border-b border-slate-800/70 backdrop-blur-md bg-slate-900/70 no-print">
