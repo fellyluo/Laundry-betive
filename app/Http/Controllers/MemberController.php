@@ -24,6 +24,35 @@ class MemberController extends Controller
         return view('superadmin.members', compact('members', 'stats'));
     }
 
+    /** Super admin mengubah profil sendiri (nama, username, password opsional). */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'username' => 'required|string|max:50|alpha_dash|unique:users,username,' . $user->id,
+            'password' => 'nullable|string|min:6',
+        ], [
+            'username.required' => 'Username wajib diisi',
+            'username.unique' => 'Username sudah dipakai',
+            'username.alpha_dash' => 'Username hanya boleh huruf, angka, strip, underscore',
+            'password.min' => 'Password minimal 6 karakter',
+        ]);
+
+        $data = [
+            'name' => trim($validated['name'] ?? '') ?: null,
+            'username' => $validated['username'],
+        ];
+        if (! empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('members.index')->with('success', 'Profil Anda berhasil diperbarui.');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

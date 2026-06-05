@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('superadmin')->group(function () {
         Route::get('/members', [MemberController::class, 'index'])->name('members.index');
         Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+        Route::put('/members/profile', [MemberController::class, 'updateProfile'])->name('members.profile');
         Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');
         Route::post('/members/{user}/toggle', [MemberController::class, 'toggle'])->name('members.toggle');
         Route::put('/members/{user}/password', [MemberController::class, 'password'])->name('members.password');

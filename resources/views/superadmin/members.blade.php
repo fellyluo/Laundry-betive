@@ -31,6 +31,32 @@
         <div class="bg-slate-900/60 border border-slate-800/80 p-5 rounded-xl shadow-lg"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Terblokir</p><h3 class="text-2xl font-black text-rose-400 mt-1">{{ $stats['blokir'] }}</h3></div>
     </div>
 
+    <!-- Profil Saya (Super Admin) -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 mb-4 flex items-center gap-2"><i data-lucide="user-cog" class="h-5 w-5 text-accent"></i><span>Profil Saya</span><span class="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20 font-bold uppercase ml-1">Super Admin</span></h3>
+        <form method="POST" action="{{ route('members.profile') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+            @csrf @method('PUT')
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Nama</label>
+                <input type="text" name="name" value="{{ auth()->user()->name }}" placeholder="Nama Anda" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Username</label>
+                <input type="text" name="username" value="{{ auth()->user()->username }}" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white focus:outline-none transition-all font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password Baru <span class="text-slate-600 normal-case font-normal">(opsional)</span></label>
+                <div class="relative">
+                    <input type="password" name="password" id="profPass" placeholder="Kosongkan jika tidak ganti" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                    <button type="button" onclick="togglePass('profPass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
+                </div>
+            </div>
+            <div class="sm:col-span-3 flex justify-end pt-1">
+                <button type="submit" class="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl text-sm transition-all flex items-center gap-2"><i data-lucide="save" class="h-4 w-4"></i>Simpan Profil</button>
+            </div>
+        </form>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <!-- Daftar member -->
         <div class="lg:col-span-2 space-y-3">
@@ -49,7 +75,7 @@
                                 @if($m->id === auth()->id())<span class="text-[9px] text-slate-500 font-bold uppercase">(Anda)</span>@endif
                             </div>
                             @if($m->name || $m->phone)
-                                <div class="text-xs text-slate-500 mt-0.5">{{ $m->name }}@if($m->name && $m->phone) · @endif@if($m->phone)<a href="https://wa.me/{{ wa_number($m->phone) }}" target="_blank" class="font-mono hover:text-accent">{{ $m->phone }}</a>@endif</div>
+                                <div class="text-xs text-slate-500 mt-0.5">{{ $m->name }}{{ $m->name && $m->phone ? ' · ' : '' }}@if($m->phone)<a href="https://wa.me/{{ wa_number($m->phone) }}" target="_blank" class="font-mono hover:text-accent">{{ $m->phone }}</a>@endif</div>
                             @endif
                             @unless($m->isSuperAdmin())
                             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
