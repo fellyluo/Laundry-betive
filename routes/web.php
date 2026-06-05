@@ -9,6 +9,11 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RegistrationController;
+
+// ---- Public self-registration (pelanggan scan QR — tanpa login) ----
+Route::get('/daftar', [RegistrationController::class, 'show'])->name('register.show');
+Route::post('/daftar', [RegistrationController::class, 'store'])->name('register.store');
 
 // ---- Authentication (public) ----
 Route::middleware('guest')->group(function () {

@@ -8,9 +8,14 @@
             <h1 class="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2"><i data-lucide="users-2" class="h-8 w-8 text-accent"></i><span>Master Pelanggan</span></h1>
             <p class="text-slate-400 text-sm mt-1">Kelola data member laundry, riwayat poin, nomor kontak WhatsApp, dan alamat penjemputan.</p>
         </div>
-        <button onclick="openAddCustomer()" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-3 rounded-xl transition-all duration-200 shadow-lg hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto justify-center">
-            <i data-lucide="plus" class="h-5 w-5"></i><span>Tambah Pelanggan</span>
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="openQrModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-4 py-3 rounded-xl transition-all border border-slate-750/30 flex-1 sm:flex-initial justify-center" title="QR untuk pendaftaran pelanggan">
+                <i data-lucide="qr-code" class="h-5 w-5 text-accent"></i><span>QR Daftar</span>
+            </button>
+            <button onclick="openAddCustomer()" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-3 rounded-xl transition-all duration-200 shadow-lg hover:-translate-y-0.5 active:translate-y-0 flex-1 sm:flex-initial justify-center">
+                <i data-lucide="plus" class="h-5 w-5"></i><span>Tambah Pelanggan</span>
+            </button>
+        </div>
     </div>
 
     @if(session('error'))
@@ -56,7 +61,16 @@
                                 <i data-lucide="map-pin" class="h-4 w-4 text-slate-500 mt-0.5 shrink-0"></i>
                                 <span class="line-clamp-2">{{ $customer->alamat ?: '' }}@unless($customer->alamat)<span class="text-slate-600 italic">Alamat belum diatur</span>@endunless</span>
                             </div>
+                            @if($customer->metode_bayar)
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="credit-card" class="h-4 w-4 text-slate-500"></i>
+                                <span class="text-xs">Bayar favorit: <span class="font-semibold text-slate-300">{{ $customer->metode_bayar }}</span></span>
+                            </div>
+                            @endif
                         </div>
+                        @if($customer->via_qr)
+                            <span class="inline-flex items-center gap-1 mt-3 px-2 py-0.5 bg-accent/10 text-accent border border-accent/20 rounded-full text-[10px] font-bold"><i data-lucide="qr-code" class="h-3 w-3"></i>Daftar via QR</span>
+                        @endif
                     </div>
                     <div class="flex justify-end gap-2 border-t border-slate-800/80 mt-6 pt-4">
                         <button onclick='openEditCustomer(@json($customer))' class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold px-3"><i data-lucide="edit-3" class="h-3.5 w-3.5"></i><span>Edit</span></button>
@@ -105,6 +119,64 @@
         </div>
     </div>
 </div>
+
+<!-- Modal QR Pendaftaran -->
+<div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in">
+        <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+            <h2 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="qr-code" class="h-5 w-5 text-accent"></i><span>QR Pendaftaran Pelanggan</span></h2>
+            <button type="button" onclick="closeQrModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div class="p-5 space-y-4 text-center">
+            <p class="text-xs text-slate-400">Minta pelanggan <b>scan QR</b> ini untuk mengisi data sendiri. Datanya langsung masuk ke Master Pelanggan.</p>
+            <div id="qrBox" class="bg-white p-3 rounded-xl inline-block mx-auto"></div>
+            <div class="bg-slate-950/60 border border-slate-850 rounded-xl p-2.5 flex items-center gap-2">
+                <span id="qrUrl" class="text-[11px] text-slate-300 font-mono truncate flex-1 text-left"></span>
+                <button type="button" onclick="copyQrUrl()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg shrink-0" title="Salin link"><i data-lucide="copy" class="h-4 w-4"></i></button>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="printQr()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-sm flex items-center justify-center gap-2"><i data-lucide="printer" class="h-4 w-4"></i><span>Cetak</span></button>
+                <button type="button" onclick="closeQrModal()" class="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl text-sm">Tutup</button>
+            </div>
+            <p class="text-[10px] text-slate-550 flex items-start gap-1.5 text-left"><i data-lucide="info" class="h-3.5 w-3.5 shrink-0 mt-0.5"></i><span>Agar bisa discan dari HP pelanggan, aplikasi harus diakses lewat alamat jaringan/domain (bukan localhost). QR mengikuti alamat yang sedang Anda buka.</span></p>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    let _qrObj = null;
+    function regUrl() { return window.location.origin + '/daftar'; }
+    function openQrModal() {
+        const url = regUrl();
+        const box = document.getElementById('qrBox');
+        box.innerHTML = '';
+        _qrObj = new QRCode(box, { text: url, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        document.getElementById('qrUrl').textContent = url;
+        const m = document.getElementById('qrModal'); m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function closeQrModal(){ const m=document.getElementById('qrModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+    function copyQrUrl(){ navigator.clipboard?.writeText(regUrl()).then(()=>{}, ()=>{}); }
+    function qrImageSrc() {
+        const box = document.getElementById('qrBox');
+        const img = box.querySelector('img'); const cv = box.querySelector('canvas');
+        return img && img.src ? img.src : (cv ? cv.toDataURL('image/png') : '');
+    }
+    function printQr() {
+        const src = qrImageSrc(); if (!src) return;
+        const w = window.open('', '_blank', 'width=420,height=560');
+        w.document.write(`<html><head><title>QR Pendaftaran</title></head><body style="font-family:sans-serif;text-align:center;padding:24px;">
+            <h2 style="margin:0 0 4px;">{{ $appSettings['branding']['nama_laundry'] ?? 'LaundryPro' }}</h2>
+            <p style="margin:0 0 16px;color:#555;">Scan untuk daftar jadi member</p>
+            <img src="${src}" style="width:260px;height:260px;"/>
+            <p style="margin-top:12px;font-size:12px;color:#777;word-break:break-all;">${regUrl()}</p>
+            </body></html>`);
+        w.document.close(); w.focus();
+        setTimeout(() => { w.print(); }, 300);
+    }
+</script>
+@endpush
 
 @push('scripts')
 <script>

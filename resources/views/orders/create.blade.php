@@ -3,7 +3,7 @@
 @section('content')
 @php
     $defaultEstimasi = \Carbon\Carbon::now()->addDays(2)->setTime(17, 0)->format('Y-m-d\TH:i');
-    $custArr = $customers->map(fn($c) => ['id' => $c->id, 'nama' => $c->nama, 'no_hp' => $c->no_hp, 'alamat' => $c->alamat, 'poin' => $c->poin])->values();
+    $custArr = $customers->map(fn($c) => ['id' => $c->id, 'nama' => $c->nama, 'no_hp' => $c->no_hp, 'alamat' => $c->alamat, 'poin' => $c->poin, 'metode_bayar' => $c->metode_bayar])->values();
     $svcArr = $services->map(fn($s) => ['id' => $s->id, 'nama' => $s->nama, 'tarif' => $s->tarif, 'satuan' => $s->satuan])->values();
     $methodInfo = collect($methods)->mapWithKeys(fn($m) => [$m['nama'] => ['no_rek' => $m['no_rek'] ?? null, 'qris' => $m['qris'] ?? null]]);
 @endphp
@@ -182,8 +182,17 @@
         const d = document.getElementById('customerDetail');
         d.innerHTML = `<div><span class="font-bold text-slate-300">HP:</span> ${esc(c.no_hp)}</div>`
             + (c.alamat ? `<div><span class="font-bold text-slate-300">Alamat:</span> ${esc(c.alamat)}</div>` : '')
-            + `<div><span class="font-bold text-slate-300">Poin Saat Ini:</span> ${c.poin||0} Poin</div>`;
+            + `<div><span class="font-bold text-slate-300">Poin Saat Ini:</span> ${c.poin||0} Poin</div>`
+            + (c.metode_bayar ? `<div><span class="font-bold text-slate-300">Bayar favorit:</span> ${esc(c.metode_bayar)}</div>` : '');
         d.classList.remove('hidden');
+        // Integrasi: pre-select metode bayar favorit pelanggan
+        if (c.metode_bayar) {
+            const sel = document.getElementById('metodeBayar');
+            if (sel && [...sel.options].some(o => o.value === c.metode_bayar)) {
+                sel.value = c.metode_bayar;
+                if (typeof onMethodChange === 'function') onMethodChange(c.metode_bayar);
+            }
+        }
     }
     function clearCustomer() {
         document.getElementById('customerSearch').value = '';
