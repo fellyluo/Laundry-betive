@@ -63,7 +63,10 @@
                 <div class="w-9 h-9 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-lg overflow-hidden">
                     @if($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
                 </div>
-                <span class="font-extrabold text-accent text-lg">{{ $nama }}</span>
+                <span class="flex flex-col leading-none">
+                    <span class="font-extrabold text-accent text-lg">{{ $nama }}</span>
+                    <span class="text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-1">Aplikasi Manajemen Laundry</span>
+                </span>
             </a>
             <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-300">
                 <a href="#fitur" class="hover:text-accent transition-colors">Fitur</a>
