@@ -217,12 +217,6 @@
                 <div class="w-8 h-8 bg-accent/10 border border-accent/20 rounded-lg flex items-center justify-center overflow-hidden">@if($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif</div>
                 <div><p class="font-extrabold text-accent leading-none">{{ $nama }}</p><p class="text-[10px] text-slate-550 mt-0.5">Aplikasi Manajemen Laundry</p></div>
             </div>
-            <div class="flex items-center gap-5 text-sm font-semibold text-slate-400">
-                <a href="#fitur" class="hover:text-accent transition-colors">Fitur</a>
-                @guest<a href="{{ route('member.signup') }}" class="hover:text-accent transition-colors">Daftar Member</a>@endguest
-                <a href="{{ route('register.show') }}" class="hover:text-accent transition-colors">Daftar Pelanggan</a>
-                @auth<a href="{{ route('dashboard') }}" class="hover:text-accent transition-colors">Dashboard</a>@else<a href="{{ route('login') }}" class="hover:text-accent transition-colors">Masuk</a>@endauth
-            </div>
             <p class="text-xs text-slate-550">&copy; {{ date('Y') }} {{ $nama }}</p>
         </div>
     </footer>
