@@ -10,6 +10,8 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\SubscriptionController;
 
 // ---- Public self-registration (pelanggan scan QR — tanpa login) ----
 Route::get('/daftar', [RegistrationController::class, 'show'])->name('register.show');
@@ -26,7 +28,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // ---- Application (requires login) ----
 Route::middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    // Halaman blokir langganan (tanpa gating 'subscription' agar member terblokir tetap bisa melihatnya)
+    Route::get('/langganan', [SubscriptionController::class, 'blocked'])->name('langganan.blocked');
+
+    // Super Admin: kelola member & langganan
+    Route::middleware('superadmin')->group(function () {
+        Route::get('/members', [MemberController::class, 'index'])->name('members.index');
+        Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+        Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');
+        Route::post('/members/{user}/toggle', [MemberController::class, 'toggle'])->name('members.toggle');
+        Route::put('/members/{user}/password', [MemberController::class, 'password'])->name('members.password');
+        Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
+    });
+
+    // App utama — diblokir otomatis jika langganan member habis / di-suspend
+    Route::middleware('subscription')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -65,4 +82,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'save'])->name('settings.save');
     Route::post('/settings/theme-mode', [SettingController::class, 'themeMode'])->name('settings.themeMode');
+    }); // end 'subscription' group
 });

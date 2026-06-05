@@ -28,6 +28,8 @@ class UserController extends Controller
             'name' => trim($validated['name'] ?? '') ?: null,
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
+            'role' => 'member',
+            'is_active' => true,
         ]);
 
         return redirect()->route('settings.index')->with('success', 'User berhasil ditambahkan.')->withFragment('users');

@@ -45,10 +45,10 @@ class DatabaseSeeder extends Seeder
             Setting::create(['value' => Settings::defaults()]);
         }
 
-        // Default admin login (ganti password setelah login pertama)
+        // Default Super Admin login (ganti password setelah login pertama)
         User::firstOrCreate(
             ['username' => 'admin'],
-            ['name' => 'Administrator', 'password' => Hash::make('admin123')]
+            ['name' => 'Administrator', 'password' => Hash::make('admin123'), 'role' => 'super_admin', 'is_active' => true]
         );
     }
 }

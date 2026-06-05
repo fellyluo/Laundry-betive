@@ -14,6 +14,14 @@
         ['name' => 'Pengeluaran','route' => 'expenses.index',  'href' => route('expenses.index'),'icon' => 'receipt',       'active' => request()->is('expenses*')],
         ['name' => 'Pengaturan', 'route' => 'settings.index',  'href' => route('settings.index'),'icon' => 'settings',      'active' => request()->is('settings*')],
     ];
+
+    // Menu khusus Super Admin (sisipkan sebelum Pengaturan); 'super' => sidebar saja, tidak di bottom-nav
+    if (auth()->check() && auth()->user()->isSuperAdmin()) {
+        array_splice($nav, count($nav) - 1, 0, [[
+            'name' => 'Member', 'route' => 'members.index', 'href' => route('members.index'),
+            'icon' => 'shield-check', 'active' => request()->is('members*'), 'super' => true,
+        ]]);
+    }
 @endphp
 
 <!-- Mobile Top Header -->
@@ -28,6 +36,9 @@
         </div>
     </div>
     <div class="flex items-center gap-2">
+        @if(auth()->check() && auth()->user()->isSuperAdmin())
+        <a href="{{ route('members.index') }}" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-accent" title="Kelola Member"><i data-lucide="shield-check" class="h-4.5 w-4.5"></i></a>
+        @endif
         <button onclick="toggleThemeMode()" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-slate-400 cursor-pointer" title="Ubah Tema">
             @if($mode === 'light')<i data-lucide="sun" class="h-4.5 w-4.5 text-amber-500"></i>@else<i data-lucide="moon" class="h-4.5 w-4.5 text-accent"></i>@endif
         </button>
@@ -95,6 +106,7 @@
 <!-- Mobile Bottom Nav -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 text-slate-400 flex justify-around items-center py-2 px-1 z-50 shadow-2xl safe-bottom no-print">
     @foreach($nav as $item)
+        @continue(!empty($item['super']))
         @if(!empty($item['highlight']))
             <a href="{{ $item['href'] }}" class="flex flex-col items-center justify-center -translate-y-4">
                 <div class="p-3 bg-accent text-white rounded-full shadow-lg border-4 border-slate-900 hover:bg-accent/90 transition-colors group">
