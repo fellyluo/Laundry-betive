@@ -17,6 +17,7 @@ yarn-error.log
 /.idea
 /.vscode
 
-# Local SQLite data (recreate with: php artisan migrate:fresh --seed)
+# Local SQLite data + backups (jangan commit data ke git)
 /database/database.sqlite
+/database/backups/
 /storage/sb.json
