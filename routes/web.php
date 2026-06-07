@@ -11,11 +11,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MemberSignupController;
 
-// ---- Landing page (publik) ----
-Route::get('/', [LandingController::class, 'index'])->name('landing');
+// ---- Root: tanpa landing internal (landing ada di website terpisah). Arahkan ke login. ----
+Route::redirect('/', '/login');
 
 // ---- Daftar jadi member/pengguna aplikasi (publik) ----
 Route::get('/daftar-member', [MemberSignupController::class, 'show'])->name('member.signup');

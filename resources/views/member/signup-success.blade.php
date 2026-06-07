@@ -19,9 +19,6 @@
 
     <p class="text-[11px] text-slate-500">Super Admin akan menghubungi Anda untuk pengaturan langganan/sewa. Setelah diaktifkan, Anda bisa langsung login dan mengelola laundry Anda.</p>
 
-    <div class="flex flex-col sm:flex-row gap-2">
-        <a href="{{ route('landing') }}" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2"><i data-lucide="home" class="h-4.5 w-4.5"></i>Beranda</a>
-        <a href="{{ route('login') }}" class="flex-1 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-4.5 w-4.5"></i>Halaman Masuk</a>
-    </div>
+    <a href="{{ route('login') }}" class="block w-full py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2"><i data-lucide="log-in" class="h-4.5 w-4.5"></i>Halaman Masuk</a>
 </div>
 @endsection
