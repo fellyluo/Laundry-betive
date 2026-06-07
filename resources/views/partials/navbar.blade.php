@@ -58,7 +58,7 @@
             @if($isSuper)<i data-lucide="shield-check" class="h-6 w-6"></i>@elseif($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
         </div>
         <div class="overflow-hidden flex flex-col justify-center">
-            <h1 class="font-extrabold text-lg leading-none truncate max-w-[150px] {{ $isSuper ? 'text-indigo-300' : 'text-accent' }}">{{ $namaLaundry }}</h1>
+            <h1 class="font-extrabold text-base leading-tight break-words {{ $isSuper ? 'text-indigo-300' : 'text-accent' }}">{{ $namaLaundry }}</h1>
             <span class="text-[9px] uppercase tracking-widest font-bold mt-1 block leading-none {{ $isSuper ? 'text-indigo-300/70' : 'text-slate-550' }}">{{ $brandSub }}</span>
         </div>
     </div>
