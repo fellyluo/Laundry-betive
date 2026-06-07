@@ -26,23 +26,22 @@
             ['name' => 'Pengaturan', 'href' => route('settings.index'),'icon' => 'settings',       'active' => request()->is('settings*')],
         ];
     }
+
+    $brandSub = $isSuper ? 'Super Admin' : 'Premium Laundry';
 @endphp
 
 <!-- Mobile Top Header -->
 <header class="md:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900 border-b border-slate-800 text-slate-100 flex items-center justify-between px-4 z-50 shadow-sm no-print">
     <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-lg shadow-inner overflow-hidden">
-            @if($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg shadow-inner overflow-hidden {{ $isSuper ? 'bg-indigo-500/15 border border-indigo-400/30 text-indigo-300' : 'bg-accent/10 border border-accent/20' }}">
+            @if($isSuper)<i data-lucide="shield-check" class="h-4.5 w-4.5"></i>@elseif($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
         </div>
         <div class="flex flex-col justify-center">
-            <h1 class="font-extrabold text-sm leading-none text-accent truncate max-w-[180px]">{{ $namaLaundry }}</h1>
-            <span class="text-[8px] text-slate-550 uppercase tracking-widest font-bold mt-0.5 block leading-none">Premium Laundry</span>
+            <h1 class="font-extrabold text-sm leading-none truncate max-w-[180px] {{ $isSuper ? 'text-indigo-300' : 'text-accent' }}">{{ $namaLaundry }}</h1>
+            <span class="text-[8px] uppercase tracking-widest font-bold mt-0.5 block leading-none {{ $isSuper ? 'text-indigo-300/70' : 'text-slate-550' }}">{{ $brandSub }}</span>
         </div>
     </div>
     <div class="flex items-center gap-2">
-        @if(auth()->check() && auth()->user()->isSuperAdmin())
-        <a href="{{ route('members.index') }}" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-accent" title="Kelola Member"><i data-lucide="shield-check" class="h-4.5 w-4.5"></i></a>
-        @endif
         <button onclick="toggleThemeMode()" class="flex items-center p-2 bg-slate-950/60 border border-slate-850 rounded-xl hover:border-slate-800 transition-all text-slate-400 cursor-pointer" title="Ubah Tema">
             @if($mode === 'light')<i data-lucide="sun" class="h-4.5 w-4.5 text-amber-500"></i>@else<i data-lucide="moon" class="h-4.5 w-4.5 text-accent"></i>@endif
         </button>
@@ -55,12 +54,12 @@
 <!-- Desktop Sidebar -->
 <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-slate-100 min-h-screen border-r border-slate-800 shrink-0 no-print">
     <div class="p-6 border-b border-slate-800 flex items-center gap-3">
-        <div class="w-10 h-10 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-2xl shadow-inner overflow-hidden">
-            @if($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-2xl shadow-inner overflow-hidden {{ $isSuper ? 'bg-indigo-500/15 border border-indigo-400/30 text-indigo-300' : 'bg-accent/10 border border-accent/20' }}">
+            @if($isSuper)<i data-lucide="shield-check" class="h-6 w-6"></i>@elseif($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover">@else{{ $logoEmoji }}@endif
         </div>
         <div class="overflow-hidden flex flex-col justify-center">
-            <h1 class="font-extrabold text-lg leading-none text-accent truncate max-w-[150px]">{{ $namaLaundry }}</h1>
-            <span class="text-[9px] text-slate-550 uppercase tracking-widest font-bold mt-1 block leading-none">Premium Laundry</span>
+            <h1 class="font-extrabold text-lg leading-none truncate max-w-[150px] {{ $isSuper ? 'text-indigo-300' : 'text-accent' }}">{{ $namaLaundry }}</h1>
+            <span class="text-[9px] uppercase tracking-widest font-bold mt-1 block leading-none {{ $isSuper ? 'text-indigo-300/70' : 'text-slate-550' }}">{{ $brandSub }}</span>
         </div>
     </div>
 
@@ -90,10 +89,10 @@
     <div class="px-4 py-3 border-t border-slate-800/80">
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-accent shrink-0"><i data-lucide="user" class="h-4 w-4"></i></div>
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $isSuper ? 'bg-indigo-500/15 text-indigo-300' : 'bg-slate-800 text-accent' }}"><i data-lucide="{{ $isSuper ? 'shield-check' : 'store' }}" class="h-4 w-4"></i></div>
                 <div class="min-w-0 leading-tight">
                     <div class="text-xs font-semibold text-slate-200 truncate max-w-[120px]">{{ optional(auth()->user())->username }}</div>
-                    <div class="text-[9px] text-slate-550 uppercase tracking-wider font-bold">Sedang masuk</div>
+                    <div class="text-[9px] uppercase tracking-wider font-bold {{ $isSuper ? 'text-indigo-300/70' : 'text-slate-550' }}">{{ $isSuper ? 'Super Admin' : 'Member' }}</div>
                 </div>
             </div>
             <form method="POST" action="{{ route('logout') }}">@csrf

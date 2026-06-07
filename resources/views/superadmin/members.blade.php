@@ -68,7 +68,11 @@
                 @endphp
                 <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-lg">
                     <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-inner {{ $m->isSuperAdmin() ? 'bg-indigo-500/15 border border-indigo-400/30 text-indigo-300' : 'bg-accent/10 border border-accent/20 text-accent' }}">
+                                <i data-lucide="{{ $m->isSuperAdmin() ? 'shield-check' : 'store' }}" class="h-5 w-5"></i>
+                            </div>
+                            <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="font-bold text-white">{{ $m->username }}</span>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $cls }}">{{ $label }}</span>
@@ -86,6 +90,7 @@
                                 @endif
                             </div>
                             @endunless
+                            </div>
                         </div>
                     </div>
 
