@@ -10,12 +10,15 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        $expenses = Expense::orderByDesc('tanggal')->orderByDesc('id')->get();
-
         $today = Carbon::today();
-        $totalToday = $expenses->filter(fn ($e) => $e->tanggal && $e->tanggal->isSameDay($today))->sum('jumlah');
-        $totalMonth = $expenses->filter(fn ($e) => $e->tanggal && $e->tanggal->format('Y-m') === $today->format('Y-m'))->sum('jumlah');
-        $totalAll = $expenses->sum('jumlah');
+
+        // Total dihitung langsung di DB agar tetap akurat lintas halaman (bukan hanya halaman aktif).
+        $totalToday = (int) Expense::whereDate('tanggal', $today)->sum('jumlah');
+        $totalMonth = (int) Expense::whereYear('tanggal', $today->year)
+            ->whereMonth('tanggal', $today->month)->sum('jumlah');
+        $totalAll = (int) Expense::sum('jumlah');
+
+        $expenses = Expense::orderByDesc('tanggal')->orderByDesc('id')->paginate(20);
 
         return view('expenses.index', compact('expenses', 'totalToday', 'totalMonth', 'totalAll'));
     }

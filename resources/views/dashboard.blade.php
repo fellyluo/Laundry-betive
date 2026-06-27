@@ -106,7 +106,7 @@
         </a>
     </div>
 
-    @if($orders->isEmpty())
+    @if($recentOrders->isEmpty())
         <div class="bg-slate-900/40 border border-slate-850 p-12 rounded-3xl text-center max-w-2xl mx-auto space-y-6 mt-8 shadow-xl">
             <div class="mx-auto w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center text-accent border border-slate-700/50"><i data-lucide="shopping-bag" class="h-10 w-10"></i></div>
             <div>

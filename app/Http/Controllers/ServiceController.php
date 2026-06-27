@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrderItem;
 use App\Models\Service;
 use Illuminate\Http\Request;
 
@@ -33,11 +34,14 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
-        try {
-            $service->delete();
-        } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menghapus layanan. Layanan mungkin sudah dipakai dalam order.');
+        // Layanan yang sudah dipakai di order tidak boleh dihapus (agar nota lama tetap utuh).
+        // Untuk menyembunyikannya dari form order, gunakan tombol nonaktifkan.
+        if (OrderItem::where('service_id', $service->id)->exists()) {
+            return back()->with('error', 'Layanan tidak bisa dihapus karena sudah dipakai di order. Nonaktifkan saja bila tak ingin dipakai lagi.');
         }
+
+        $service->delete();
+
         return redirect()->route('services.index')->with('success', 'Layanan dihapus.');
     }
 

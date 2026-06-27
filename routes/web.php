@@ -27,9 +27,11 @@ Route::post('/daftar/{user}', [RegistrationController::class, 'store'])->name('r
 // ---- Authentication (public) ----
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+    // Backstop anti brute-force per IP (cap kasar); throttle halus per-username ada di controller.
+    Route::post('/login', [AuthController::class, 'login'])->name('login.attempt')
+        ->middleware('throttle:20,1');
+    // Info "lupa password": tidak ada reset mandiri (rawan ambil-alih akun). Arahkan hubungi admin.
     Route::get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.forgot');
-    Route::post('/forgot-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 });
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 

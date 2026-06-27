@@ -120,7 +120,7 @@
                 <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama (opsional)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
                 <input type="text" name="username" value="{{ old('username') }}" placeholder="Username *" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none transition-all font-mono">
                 <div class="relative">
-                    <input type="password" name="password" id="newMemberPass" placeholder="Password * (min. 6)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
+                    <input type="password" name="password" id="newMemberPass" placeholder="Password * (min. 8)" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none transition-all">
                     <button type="button" onclick="togglePass('newMemberPass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -183,7 +183,7 @@
             @csrf @method('PUT')
             <p class="text-xs text-slate-400">Member: <span id="mp_user" class="font-bold text-slate-200 font-mono"></span></p>
             <div class="relative">
-                <input type="password" name="password" id="mp_pass" required minlength="6" placeholder="Password baru (min. 6)" class="w-full bg-slate-950 border border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-600 focus:outline-none text-sm">
+                <input type="password" name="password" id="mp_pass" required minlength="8" placeholder="Password baru (min. 8)" class="w-full bg-slate-950 border border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-600 focus:outline-none text-sm">
                 <button type="button" onclick="togglePass('mp_pass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
             </div>
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">

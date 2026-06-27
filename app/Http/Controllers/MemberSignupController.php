@@ -24,14 +24,14 @@ class MemberSignupController extends Controller
                 }
             }],
             'username' => 'required|string|max:50|alpha_dash|unique:users,username',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ], [
             'name.required' => 'Nama / nama usaha wajib diisi',
             'phone.required' => 'Nomor HP / WhatsApp wajib diisi',
             'username.required' => 'Username wajib diisi',
             'username.unique' => 'Username sudah dipakai, coba yang lain',
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, strip, underscore',
-            'password.min' => 'Password minimal 6 karakter',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         // Dibuat sebagai member PENDING (belum aktif) — menunggu aktivasi Super Admin.

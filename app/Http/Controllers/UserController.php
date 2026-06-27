@@ -15,13 +15,13 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'username' => 'required|string|max:50|alpha_dash|unique:users,username',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ], [
             'username.required' => 'Username wajib diisi',
             'username.unique' => 'Username sudah dipakai',
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, strip, dan underscore',
             'password.required' => 'Password wajib diisi',
-            'password.min' => 'Password minimal 6 karakter',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         User::create([
@@ -38,10 +38,10 @@ class UserController extends Controller
     public function updatePassword(Request $request, User $user)
     {
         $validated = $request->validate([
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ], [
             'password.required' => 'Password baru wajib diisi',
-            'password.min' => 'Password minimal 6 karakter',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         $user->update(['password' => Hash::make($validated['password'])]);

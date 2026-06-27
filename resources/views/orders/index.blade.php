@@ -32,46 +32,55 @@
         <a href="{{ route('orders.create') }}" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-3 rounded-xl transition-all duration-200 shadow-lg hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto justify-center"><i data-lucide="plus" class="h-5 w-5"></i><span>Buat Order Baru</span></a>
     </div>
 
-    <!-- Filter bar -->
-    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+    <!-- Filter bar (server-side) -->
+    @php $filterActive = $q !== '' || ($status !== 'semua' && $status !== '') || ($bayar !== 'semua' && $bayar !== ''); @endphp
+    <form method="GET" action="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500"><i data-lucide="search" class="h-4.5 w-4.5"></i></span>
-                <input type="text" id="orderSearch" oninput="filterOrders()" placeholder="Cari nota, pelanggan, HP..." class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent focus:outline-none rounded-xl pl-10 pr-4 py-2.5 text-slate-200 placeholder-slate-600 transition-all text-sm">
+                <input type="text" name="q" value="{{ $q }}" placeholder="Cari nota, pelanggan, HP... (Enter)" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent focus:outline-none rounded-xl pl-10 pr-4 py-2.5 text-slate-200 placeholder-slate-600 transition-all text-sm">
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-slate-400 text-xs shrink-0 font-medium">Status:</span>
-                <select id="orderStatus" onchange="filterOrders()" class="w-full bg-slate-950 border border-slate-855 focus:border-accent focus:outline-none rounded-xl px-3 py-2.5 text-slate-200 text-sm transition-all">
-                    <option value="semua">Semua Status Pengerjaan</option>
-                    <option value="diterima">Diterima</option>
-                    <option value="diproses">Diproses (Sedang Dicuci)</option>
-                    <option value="selesai">Selesai (Siap Diambil)</option>
-                    <option value="diambil">Diambil (Sudah Diserahkan)</option>
-                    <option value="dibatalkan">Dibatalkan</option>
+                <select name="status" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-855 focus:border-accent focus:outline-none rounded-xl px-3 py-2.5 text-slate-200 text-sm transition-all">
+                    <option value="semua" @selected($status==='semua')>Semua Status Pengerjaan</option>
+                    <option value="diterima" @selected($status==='diterima')>Diterima</option>
+                    <option value="diproses" @selected($status==='diproses')>Diproses (Sedang Dicuci)</option>
+                    <option value="selesai" @selected($status==='selesai')>Selesai (Siap Diambil)</option>
+                    <option value="diambil" @selected($status==='diambil')>Diambil (Sudah Diserahkan)</option>
+                    <option value="dibatalkan" @selected($status==='dibatalkan')>Dibatalkan</option>
                 </select>
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-slate-400 text-xs shrink-0 font-medium">Bayar:</span>
-                <select id="orderBayar" onchange="filterOrders()" class="w-full bg-slate-950 border border-slate-855 focus:border-accent focus:outline-none rounded-xl px-3 py-2.5 text-slate-200 text-sm transition-all">
-                    <option value="semua">Semua Status Bayar</option>
-                    <option value="belum">Belum Bayar</option>
-                    <option value="lunas">Lunas</option>
+                <select name="bayar" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-855 focus:border-accent focus:outline-none rounded-xl px-3 py-2.5 text-slate-200 text-sm transition-all">
+                    <option value="semua" @selected($bayar==='semua')>Semua Status Bayar</option>
+                    <option value="belum" @selected($bayar==='belum')>Belum Bayar</option>
+                    <option value="lunas" @selected($bayar==='lunas')>Lunas</option>
                 </select>
             </div>
         </div>
-        <div class="flex justify-end pt-1 hidden" id="orderResetWrap">
-            <button onclick="resetOrderFilters()" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 font-semibold transition-colors"><i data-lucide="x" class="h-3.5 w-3.5"></i><span>Reset Filter</span></button>
+        <div class="flex justify-end pt-1 {{ $filterActive ? '' : 'hidden' }}">
+            <a href="{{ route('orders.index') }}" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 font-semibold transition-colors"><i data-lucide="x" class="h-3.5 w-3.5"></i><span>Reset Filter</span></a>
         </div>
-    </div>
+    </form>
 
     @if($orders->isEmpty())
         <div class="bg-slate-900/40 border border-slate-850 p-12 rounded-3xl text-center max-w-md mx-auto space-y-4">
             <div class="mx-auto w-16 h-16 bg-slate-850 rounded-full flex items-center justify-center text-accent border border-slate-800"><i data-lucide="clipboard-list" class="h-8 w-8"></i></div>
             <div>
                 <h3 class="text-lg font-bold text-white">Order Tidak Ditemukan</h3>
-                <p class="text-slate-400 text-sm mt-1">Belum ada nota transaksi. Buat order pertama untuk memulai.</p>
+                @if($filterActive)
+                    <p class="text-slate-400 text-sm mt-1">Tidak ada nota yang cocok dengan filter atau pencarian Anda.</p>
+                @else
+                    <p class="text-slate-400 text-sm mt-1">Belum ada nota transaksi. Buat order pertama untuk memulai.</p>
+                @endif
             </div>
-            <a href="{{ route('orders.create') }}" class="inline-block bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all">Buat Order Baru</a>
+            @if($filterActive)
+                <a href="{{ route('orders.index') }}" class="inline-block bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all">Reset Pencarian</a>
+            @else
+                <a href="{{ route('orders.create') }}" class="inline-block bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all">Buat Order Baru</a>
+            @endif
         </div>
     @else
         <div class="space-y-4" id="orderList">
@@ -123,56 +132,7 @@
                 </div>
             @endforeach
         </div>
-        <div id="orderNoMatch" class="hidden bg-slate-900/40 border border-slate-850 p-12 rounded-3xl text-center max-w-md mx-auto space-y-4">
-            <div class="mx-auto w-16 h-16 bg-slate-850 rounded-full flex items-center justify-center text-accent border border-slate-800"><i data-lucide="clipboard-list" class="h-8 w-8"></i></div>
-            <div>
-                <h3 class="text-lg font-bold text-white">Order Tidak Ditemukan</h3>
-                <p class="text-slate-400 text-sm mt-1">Tidak ada nota transaksi yang cocok dengan filter atau pencarian Anda.</p>
-            </div>
-            <button onclick="resetOrderFilters()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all">Reset Pencarian</button>
-        </div>
+        <div class="mt-6">{{ $orders->links() }}</div>
     @endif
 </div>
-
-@push('scripts')
-<script>
-    function filterOrders() {
-        const q = document.getElementById('orderSearch').value.toLowerCase().trim();
-        const st = document.getElementById('orderStatus').value;
-        const by = document.getElementById('orderBayar').value;
-        const cards = document.querySelectorAll('.order-card');
-        let visible = 0;
-        cards.forEach(c => {
-            let ok = (!q || c.dataset.search.includes(q));
-            if (ok && st !== 'semua') ok = c.dataset.status === st;
-            if (ok && by !== 'semua') ok = c.dataset.bayar === by;
-            c.style.display = ok ? '' : 'none';
-            if (ok) visible++;
-        });
-        const noMatch = document.getElementById('orderNoMatch');
-        const list = document.getElementById('orderList');
-        if (noMatch && list) {
-            noMatch.classList.toggle('hidden', visible !== 0);
-        }
-        const active = q || st !== 'semua' || by !== 'semua';
-        document.getElementById('orderResetWrap').classList.toggle('hidden', !active);
-    }
-    function resetOrderFilters() {
-        document.getElementById('orderSearch').value = '';
-        document.getElementById('orderStatus').value = 'semua';
-        document.getElementById('orderBayar').value = 'semua';
-        filterOrders();
-    }
-    // Pre-filter from URL query (?status=..&bayar=..&q=..) — dipakai oleh kartu Dashboard
-    (function () {
-        const p = new URLSearchParams(window.location.search);
-        const st = p.get('status'), by = p.get('bayar'), q = p.get('q');
-        const stEl = document.getElementById('orderStatus'), byEl = document.getElementById('orderBayar'), qEl = document.getElementById('orderSearch');
-        if (st && stEl && [...stEl.options].some(o => o.value === st)) stEl.value = st;
-        if (by && byEl && [...byEl.options].some(o => o.value === by)) byEl.value = by;
-        if (q && qEl) qEl.value = q;
-        if (st || by || q) filterOrders();
-    })();
-</script>
-@endpush
 @endsection

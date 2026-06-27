@@ -33,7 +33,7 @@
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500"><i data-lucide="lock" class="h-4 w-4"></i></span>
-            <input type="password" name="password" id="msPass" placeholder="Minimal 6 karakter"
+            <input type="password" name="password" id="msPass" placeholder="Minimal 8 karakter"
                    class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl pl-10 pr-10 py-2.5 text-white placeholder-slate-600 focus:outline-none transition-all text-sm">
             <button type="button" onclick="togglePass('msPass', this)" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 hover:text-slate-300"><i data-lucide="eye" class="h-4 w-4"></i></button>
         </div>

@@ -115,10 +115,8 @@ class RegistrationController extends Controller
                 }
                 $order->logs()->create(['status' => 'diterima']);
 
-                $added = intdiv($total, 10000);
-                if ($added > 0) {
-                    $customer->increment('poin', $added);
-                }
+                // Poin loyalitas diberikan nanti saat order dibayar/lunas di outlet,
+                // bukan saat pesanan mandiri dibuat (status awal: belum bayar).
 
                 return $order;
             });

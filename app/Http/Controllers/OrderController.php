@@ -11,16 +11,31 @@ use App\Models\StatusLog;
 use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $q = trim((string) $request->query('q', ''));
+        $status = (string) $request->query('status', 'semua');
+        $bayar = (string) $request->query('bayar', 'semua');
+
         $orders = Order::with(['customer', 'items.service', 'payments'])
+            ->when($q !== '', fn ($w) => $w->where(function ($x) use ($q) {
+                $x->where('nomor_nota', 'like', "%{$q}%")
+                    ->orWhereHas('customer', fn ($c) => $c->where('nama', 'like', "%{$q}%")->orWhere('no_hp', 'like', "%{$q}%"));
+            }))
+            ->when($status !== 'semua' && $status !== '', fn ($w) => $w->where('status', $status))
+            // "Belum bayar" mencakup DP (sebagian) agar konsisten dengan dashboard.
+            ->when($bayar === 'belum', fn ($w) => $w->whereIn('status_bayar', ['belum', 'dp']))
+            ->when($bayar === 'lunas', fn ($w) => $w->where('status_bayar', 'lunas'))
             ->orderByDesc('tanggal_masuk')
-            ->get();
-        return view('orders.index', compact('orders'));
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('orders.index', compact('orders', 'q', 'status', 'bayar'));
     }
 
     public function create()
@@ -36,11 +51,12 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            // Scope ke tenant: cegah member memakai customer milik laundry lain (exists biasa bypass global scope).
+            'customer_id' => ['required', Rule::exists('customers', 'id')->where('user_id', auth()->id())],
             'estimasi_selesai' => 'required|date',
             'catatan' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.service_id' => ['required', Rule::exists('services', 'id')->where('user_id', auth()->id())],
             'items.*.qty' => 'required|numeric|min:0.01',
             'status_bayar' => 'required|in:belum,lunas',
             'jumlah_bayar' => 'nullable|numeric|min:0',
@@ -73,16 +89,12 @@ class OrderController extends Controller
                 ];
             }
 
-            // Payment
-            $statusBayar = 'belum';
+            // Pembayaran awal (jika ada)
             $paidAmount = 0;
             if ($validated['status_bayar'] === 'lunas') {
                 $paidAmount = $total;
             } elseif (! empty($validated['jumlah_bayar'])) {
                 $paidAmount = (int) $validated['jumlah_bayar'];
-            }
-            if ($paidAmount > 0 && $paidAmount >= $total) {
-                $statusBayar = 'lunas';
             }
 
             // nomor_nota: YYYYMMDD-XXX (unik global lintas member)
@@ -100,7 +112,7 @@ class OrderController extends Controller
                 'estimasi_selesai' => Carbon::parse($validated['estimasi_selesai']),
                 'status' => 'diterima',
                 'total' => $total,
-                'status_bayar' => $statusBayar,
+                'status_bayar' => 'belum',
                 'catatan' => $validated['catatan'] ?? null,
             ]);
 
@@ -111,20 +123,14 @@ class OrderController extends Controller
             if ($paidAmount > 0) {
                 $order->payments()->create([
                     'jumlah' => $paidAmount,
-                    'metode' => $validated['metode_bayar'] ?: 'cash',
+                    'metode' => ($validated['metode_bayar'] ?? null) ?: 'cash',
                 ]);
             }
 
             $order->logs()->create(['status' => 'diterima']);
 
-            // Loyalty points: 1 per Rp 10.000
-            $added = intdiv($total, 10000);
-            if ($added > 0) {
-                $customer = Customer::find($validated['customer_id']);
-                if ($customer) {
-                    $customer->increment('poin', $added);
-                }
-            }
+            // Selaraskan status bayar + beri poin loyalitas bila langsung lunas.
+            $order->syncPaymentStatus();
 
             return $order;
         });
@@ -159,11 +165,12 @@ class OrderController extends Controller
         }
 
         $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            // Scope ke tenant: cegah member memakai customer milik laundry lain (exists biasa bypass global scope).
+            'customer_id' => ['required', Rule::exists('customers', 'id')->where('user_id', auth()->id())],
             'estimasi_selesai' => 'required|date',
             'catatan' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.service_id' => ['required', Rule::exists('services', 'id')->where('user_id', auth()->id())],
             'items.*.qty' => 'required|numeric|min:0.01',
         ], [
             'customer_id.required' => 'Silakan pilih pelanggan terlebih dahulu.',
@@ -192,14 +199,15 @@ class OrderController extends Controller
                 $order->items()->create($r);
             }
 
-            $paid = (int) $order->payments()->sum('jumlah');
             $order->update([
                 'customer_id' => $validated['customer_id'],
                 'estimasi_selesai' => Carbon::parse($validated['estimasi_selesai']),
                 'catatan' => $validated['catatan'] ?? null,
                 'total' => $total,
-                'status_bayar' => $paid >= $total && $total > 0 ? 'lunas' : 'belum',
             ]);
+
+            // Total berubah -> selaraskan status bayar (dan beri poin bila kini lunas).
+            $order->syncPaymentStatus();
         });
 
         return redirect()->route('orders.show', $order)->with('success', 'Order berhasil diperbarui.');
@@ -224,10 +232,29 @@ class OrderController extends Controller
             'status' => 'required|in:diterima,diproses,selesai,diambil,dibatalkan',
         ]);
 
-        if ($order->status !== $validated['status']) {
-            $order->update(['status' => $validated['status']]);
-            $order->logs()->create(['status' => $validated['status']]);
+        $target = $validated['status'];
+
+        // No-op: status sama, abaikan tanpa error.
+        if ($order->status === $target) {
+            return redirect()->route('orders.show', $order);
         }
+
+        // Hanya izinkan transisi status yang masuk akal (cegah loncat/ubah status final).
+        $allowed = [
+            'diterima'   => ['diproses', 'dibatalkan'],
+            'diproses'   => ['selesai', 'dibatalkan'],
+            'selesai'    => ['diambil', 'dibatalkan'],
+            'diambil'    => [],
+            'dibatalkan' => [],
+        ];
+
+        if (! in_array($target, $allowed[$order->status] ?? [], true)) {
+            return redirect()->route('orders.show', $order)
+                ->with('error', "Perubahan status dari \"{$order->status}\" ke \"{$target}\" tidak diperbolehkan.");
+        }
+
+        $order->update(['status' => $target]);
+        $order->logs()->create(['status' => $target]);
 
         return redirect()->route('orders.show', $order);
     }
@@ -244,8 +271,8 @@ class OrderController extends Controller
             'metode' => $validated['metode_bayar'],
         ]);
 
-        $totalPaid = $order->payments()->sum('jumlah');
-        $order->update(['status_bayar' => $totalPaid >= $order->total ? 'lunas' : 'belum']);
+        // Selaraskan status bayar + beri poin loyalitas bila pembayaran ini melunasi order.
+        $order->syncPaymentStatus();
 
         return redirect()->route('orders.show', $order);
     }

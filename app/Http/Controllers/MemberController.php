@@ -2,10 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
+use App\Models\Service;
+use App\Models\Setting;
+use App\Models\StatusLog;
 use App\Models\User;
 use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class MemberController extends Controller
@@ -77,12 +86,12 @@ class MemberController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'username' => 'required|string|max:50|alpha_dash|unique:users,username,' . $user->id,
-            'password' => 'nullable|string|min:6',
+            'password' => 'nullable|string|min:8',
         ], [
             'username.required' => 'Username wajib diisi',
             'username.unique' => 'Username sudah dipakai',
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, strip, underscore',
-            'password.min' => 'Password minimal 6 karakter',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         $data = [
@@ -103,7 +112,7 @@ class MemberController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'username' => 'required|string|max:50|alpha_dash|unique:users,username',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
             'plan' => 'nullable|string|max:50',
             'plan_price' => 'nullable|integer|min:0',
             'subscribed_until' => 'nullable|date',
@@ -111,7 +120,7 @@ class MemberController extends Controller
             'username.required' => 'Username wajib diisi',
             'username.unique' => 'Username sudah dipakai',
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, strip, underscore',
-            'password.min' => 'Password minimal 6 karakter',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         User::create([
@@ -158,8 +167,8 @@ class MemberController extends Controller
 
     public function password(Request $request, User $user)
     {
-        $validated = $request->validate(['password' => 'required|string|min:6'], [
-            'password.min' => 'Password minimal 6 karakter',
+        $validated = $request->validate(['password' => 'required|string|min:8'], [
+            'password.min' => 'Password minimal 8 karakter',
         ]);
         $user->update(['password' => Hash::make($validated['password'])]);
         return redirect()->route('members.index')->with('success', 'Password member diperbarui.');
@@ -171,8 +180,32 @@ class MemberController extends Controller
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Tidak bisa menghapus akun sendiri.');
         }
+
+        $this->purgeTenantData($user->id);
         $user->delete();
-        return redirect()->route('members.index')->with('success', 'Member dihapus.');
+
+        return redirect()->route('members.index')->with('success', 'Member beserta seluruh datanya dihapus.');
+    }
+
+    /**
+     * Hapus seluruh data milik seorang member (tidak ada FK user_id di DB,
+     * jadi cascade dilakukan di level aplikasi) agar tidak ada data yatim.
+     */
+    private function purgeTenantData(int $userId): void
+    {
+        DB::transaction(function () use ($userId) {
+            $orderIds = Order::withoutGlobalScopes()->where('user_id', $userId)->pluck('id');
+            if ($orderIds->isNotEmpty()) {
+                Payment::whereIn('order_id', $orderIds)->delete();
+                StatusLog::whereIn('order_id', $orderIds)->delete();
+                OrderItem::whereIn('order_id', $orderIds)->delete();
+                Order::withoutGlobalScopes()->whereIn('id', $orderIds)->delete();
+            }
+            Customer::withoutGlobalScopes()->where('user_id', $userId)->delete();
+            Service::withoutGlobalScopes()->where('user_id', $userId)->delete();
+            Expense::withoutGlobalScopes()->where('user_id', $userId)->delete();
+            Setting::withoutGlobalScopes()->where('user_id', $userId)->delete();
+        });
     }
 
     /** Cegah super admin lain diubah/dihapus dari sini. */

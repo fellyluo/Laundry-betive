@@ -7,10 +7,20 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::orderByDesc('created_at')->get();
-        return view('customers.index', compact('customers'));
+        $q = trim((string) $request->query('q', ''));
+
+        $customers = Customer::when($q !== '', function ($w) use ($q) {
+                $w->where('nama', 'like', "%{$q}%")
+                    ->orWhere('no_hp', 'like', "%{$q}%")
+                    ->orWhere('alamat', 'like', "%{$q}%");
+            })
+            ->orderByDesc('created_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('customers.index', compact('customers', 'q'));
     }
 
     public function store(Request $request)
@@ -33,11 +43,13 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
-        try {
-            $customer->delete();
-        } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menghapus pelanggan. Pelanggan mungkin terikat dengan order.');
+        // Cegah data order jadi yatim / kehilangan identitas pelanggan.
+        if ($customer->orders()->exists()) {
+            return back()->with('error', 'Pelanggan tidak bisa dihapus karena masih punya riwayat order.');
         }
+
+        $customer->delete();
+
         return redirect()->route('customers.index')->with('success', 'Pelanggan dihapus.');
     }
 

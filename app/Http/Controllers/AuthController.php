@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    /** Maksimum percobaan login gagal sebelum dikunci sementara. */
+    private const MAX_ATTEMPTS = 5;
+    private const DECAY_SECONDS = 60;
+
     public function showLogin()
     {
         if (Auth::check()) {
@@ -27,12 +33,26 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi',
         ]);
 
+        $key = $this->throttleKey($request, $credentials['username']);
+
+        // Sudah melewati batas percobaan -> kunci sementara.
+        if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($key);
+            return back()
+                ->withInput($request->only('username'))
+                ->withErrors(['username' => "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik."]);
+        }
+
         $remember = $request->boolean('remember');
 
         if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $remember)) {
+            RateLimiter::clear($key);
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
+
+        // Gagal -> catat percobaan (kedaluwarsa otomatis setelah DECAY_SECONDS).
+        RateLimiter::hit($key, self::DECAY_SECONDS);
 
         return back()
             ->withInput($request->only('username'))
@@ -47,31 +67,22 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
+    /**
+     * Halaman "lupa password": tidak ada reset mandiri (rawan pengambilalihan akun
+     * karena login berbasis username tanpa verifikasi email/OTP). User diarahkan
+     * menghubungi admin platform yang dapat me-reset lewat Manajemen Pengguna.
+     */
     public function showForgot()
     {
-        return view('auth.forgot');
+        $admin = User::where('role', 'super_admin')->first();
+        $adminPhone = $admin->phone ?? (Settings::get(null)['branding']['no_telp_laundry'] ?? null);
+
+        return view('auth.forgot', ['adminPhone' => $adminPhone]);
     }
 
-    public function resetPassword(Request $request)
+    /** Kunci throttle unik per kombinasi username + IP. */
+    private function throttleKey(Request $request, string $username): string
     {
-        $validated = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string|min:6|confirmed',
-        ], [
-            'username.required' => 'Username wajib diisi',
-            'password.required' => 'Password baru wajib diisi',
-            'password.min' => 'Password minimal 6 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak cocok',
-        ]);
-
-        $user = User::where('username', $validated['username'])->first();
-        if (! $user) {
-            return back()->withInput($request->only('username'))
-                ->withErrors(['username' => 'Username tidak ditemukan.']);
-        }
-
-        $user->update(['password' => Hash::make($validated['password'])]);
-
-        return redirect()->route('login')->with('success', 'Password berhasil diubah. Silakan masuk dengan password baru.');
+        return 'login:' . Str::lower($username) . '|' . $request->ip();
     }
 }

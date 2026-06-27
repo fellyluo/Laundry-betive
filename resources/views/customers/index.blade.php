@@ -22,12 +22,15 @@
         <div class="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl flex items-center gap-2"><i data-lucide="alert-triangle" class="h-5 w-5 shrink-0"></i><span>{{ session('error') }}</span></div>
     @endif
 
-    <!-- Search -->
-    <div class="relative w-full max-w-md">
+    <!-- Search (server-side) -->
+    <form method="GET" action="{{ route('customers.index') }}" class="relative w-full max-w-md">
         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500"><i data-lucide="search" class="h-5 w-5"></i></span>
-        <input type="text" id="customerSearch" oninput="filterCustomers()" placeholder="Cari pelanggan berdasarkan nama, nomor HP..."
-               class="w-full bg-slate-900 border border-slate-800 hover:border-slate-750 focus:border-accent focus:outline-none rounded-xl pl-11 pr-4 py-3 text-slate-100 placeholder-slate-550 transition-all text-sm shadow-inner">
-    </div>
+        <input type="text" name="q" value="{{ $q }}" placeholder="Cari nama, nomor HP, alamat... lalu tekan Enter"
+               class="w-full bg-slate-900 border border-slate-800 hover:border-slate-750 focus:border-accent focus:outline-none rounded-xl pl-11 pr-10 py-3 text-slate-100 placeholder-slate-550 transition-all text-sm shadow-inner">
+        @if($q !== '')
+            <a href="{{ route('customers.index') }}" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 hover:text-slate-300" title="Hapus pencarian"><i data-lucide="x" class="h-4 w-4"></i></a>
+        @endif
+    </form>
 
     <!-- Grid -->
     @if($customers->isEmpty())
@@ -35,9 +38,17 @@
             <div class="mx-auto w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-accent"><i data-lucide="users-2" class="h-8 w-8"></i></div>
             <div>
                 <h3 class="text-lg font-bold text-white">Pelanggan Tidak Ditemukan</h3>
-                <p class="text-slate-400 text-sm mt-1">Belum ada pelanggan terdaftar di sistem. Tambahkan pelanggan untuk membuat order.</p>
+                @if($q !== '')
+                    <p class="text-slate-400 text-sm mt-1">Tidak ada pelanggan yang cocok dengan kata kunci "<span class="text-slate-200 font-semibold">{{ $q }}</span>".</p>
+                @else
+                    <p class="text-slate-400 text-sm mt-1">Belum ada pelanggan terdaftar di sistem. Tambahkan pelanggan untuk membuat order.</p>
+                @endif
             </div>
-            <button onclick="openAddCustomer()" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2.5 rounded-xl transition-all">Tambah Pelanggan Sekarang</button>
+            @if($q !== '')
+                <a href="{{ route('customers.index') }}" class="inline-block bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2.5 rounded-xl transition-all">Reset Pencarian</a>
+            @else
+                <button onclick="openAddCustomer()" class="bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2.5 rounded-xl transition-all">Tambah Pelanggan Sekarang</button>
+            @endif
         </div>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="customerGrid">
@@ -82,9 +93,7 @@
                 </div>
             @endforeach
         </div>
-        <div id="customerEmpty" class="hidden bg-slate-900/40 border border-slate-850 p-10 rounded-3xl text-center max-w-md mx-auto">
-            <p class="text-slate-400 text-sm">Tidak ada pelanggan yang cocok dengan kata kunci pencarian Anda.</p>
-        </div>
+        <div class="mt-6">{{ $customers->links() }}</div>
     @endif
 
     <!-- Modal Add/Edit -->
@@ -227,19 +236,6 @@
         return true;
     }
     function setErr(f, msg) { const e = document.getElementById('err_'+f); e.textContent = msg; e.classList.remove('hidden'); }
-
-    function filterCustomers() {
-        const q = document.getElementById('customerSearch').value.toLowerCase().trim();
-        const cards = document.querySelectorAll('.customer-card');
-        let visible = 0;
-        cards.forEach(c => {
-            const match = !q || c.dataset.search.includes(q);
-            c.style.display = match ? '' : 'none';
-            if (match) visible++;
-        });
-        const empty = document.getElementById('customerEmpty');
-        if (empty) empty.classList.toggle('hidden', visible !== 0);
-    }
 </script>
 @endpush
 @endsection
