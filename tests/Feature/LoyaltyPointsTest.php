@@ -92,6 +92,29 @@ class LoyaltyPointsTest extends TestCase
         $this->assertSame(3, (int) $this->customer->fresh()->poin);
     }
 
+    public function test_pembayaran_sebagian_jadi_dp_tanpa_poin(): void
+    {
+        // Order belum bayar, total 30.000.
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'belum',
+            'items' => [['service_id' => $this->service->id, 'qty' => 3]],
+        ])->assertSessionHasNoErrors();
+
+        $order = Order::firstOrFail();
+
+        // Bayar sebagian (DP) -> status 'dp', belum dapat poin.
+        $this->post(route('orders.payment', $order), ['jumlah_bayar' => 10000, 'metode_bayar' => 'cash']);
+        $this->assertSame('dp', $order->fresh()->status_bayar);
+        $this->assertSame(0, (int) $this->customer->fresh()->poin);
+
+        // Lunasi sisanya -> status 'lunas' + 3 poin.
+        $this->post(route('orders.payment', $order), ['jumlah_bayar' => 20000, 'metode_bayar' => 'cash']);
+        $this->assertSame('lunas', $order->fresh()->status_bayar);
+        $this->assertSame(3, (int) $this->customer->fresh()->poin);
+    }
+
     public function test_dashboard_member_tampil_tanpa_error(): void
     {
         // Satu order lunas agar agregasi dashboard mengeksekusi semua cabang query.
