@@ -8,7 +8,7 @@ Model **multi-tenant / SaaS**:
 - Pelanggan bisa **self-register + order via QR** per member (`/daftar/{member}`).
 
 ## Stack
-- PHP 8.0 (XAMPP) + Laravel 9
+- PHP 8.2+ + Laravel 12
 - Database **SQLite** (`database/database.sqlite`) — tanpa setup server DB
 - Tailwind CDN + Lucide CDN (tanpa Vite/npm)
 
