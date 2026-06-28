@@ -19,7 +19,6 @@
         $nav = [
             ['name' => 'Dashboard',  'href' => route('dashboard'),    'icon' => 'home',            'active' => request()->is('dashboard')],
             ['name' => 'Order',      'href' => route('orders.index'), 'icon' => 'clipboard-list',  'active' => request()->is('orders') || request()->is('orders/*')],
-            ['name' => 'Order Baru', 'href' => route('orders.create'),'icon' => 'plus-circle',     'active' => request()->is('orders/baru'), 'highlight' => true],
             ['name' => 'Pelanggan',  'href' => route('customers.index'),'icon' => 'users',         'active' => request()->is('customers*')],
             ['name' => 'Layanan',    'href' => route('services.index'),'icon' => 'washing-machine','active' => request()->is('services*')],
             ['name' => 'Pengeluaran','href' => route('expenses.index'),'icon' => 'receipt',        'active' => request()->is('expenses*')],
