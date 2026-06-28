@@ -22,85 +22,91 @@
     if ($maxPopular < 1) $maxPopular = 1;
 @endphp
 
-<div class="space-y-8">
+<div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="flex flex-col md:flex-row md:items-center gap-0 md:gap-2 text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-tight">
+            <h1 class="flex flex-col md:flex-row md:items-center gap-0 md:gap-2 text-xl md:text-2xl font-extrabold tracking-tight text-white leading-tight">
                 <span>Selamat Datang di</span>
                 <span class="text-accent flex items-center gap-1.5">
                     {{ $namaLaundry }}
-                    <i data-lucide="washing-machine" class="h-6 w-6 text-accent animate-pulse shrink-0"></i>
+                    <i data-lucide="washing-machine" class="h-5.5 w-5.5 text-accent animate-pulse shrink-0"></i>
                 </span>
             </h1>
-            <p class="text-slate-400 text-sm mt-0.5">
+            <p class="text-slate-400 text-xs mt-0.5">
                 Ringkasan operasional bisnis laundry Anda hari ini, {{ format_date(now()) }}.
             </p>
         </div>
-        <a href="{{ route('orders.create') }}" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-medium px-5 py-3 rounded-xl transition-all duration-200 shadow-lg hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto justify-center">
-            <i data-lucide="plus" class="h-5 w-5"></i>
-            <span>Buat Order Baru</span>
-        </a>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button type="button" id="layoutToggle" onclick="toggleLayoutEdit()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-4 py-2.5 rounded-xl transition-all duration-200 border border-slate-700/50 justify-center text-sm shrink-0" title="Susun ulang tata letak dashboard">
+                <i data-lucide="layout-grid" class="h-4.5 w-4.5"></i>
+                <span id="layoutToggleText" class="whitespace-nowrap">Atur Tata Letak</span>
+            </button>
+            <a href="{{ route('orders.create') }}" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-medium px-4.5 py-2.5 rounded-xl transition-all duration-200 shadow-lg flex-1 sm:flex-initial justify-center text-sm">
+                <i data-lucide="plus" class="h-4.5 w-4.5"></i>
+                <span class="whitespace-nowrap">Buat Order Baru</span>
+            </a>
+        </div>
     </div>
 
-    <!-- Stats Cards (clickable → menuju bagiannya). Angka di baris sendiri (full width, tidak terpotong) -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4 lg:gap-6">
-        <a href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-accent/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+    <!-- Stats Cards (clickable → menuju bagiannya; bisa disusun ulang via "Atur Tata Letak") -->
+    <div id="statCards" class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 lg:gap-4.5">
+        <a data-skey="omzet_laundry" href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-accent/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Laundry</p>
-                <div class="p-2 bg-accent/10 text-accent rounded-lg group-hover:bg-accent/20 transition-colors shrink-0"><i data-lucide="wallet" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Laundry</p>
+                <div class="p-1.5 bg-accent/10 text-accent rounded-lg group-hover:bg-accent/20 transition-colors shrink-0"><i data-lucide="wallet" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight group-hover:text-accent transition-colors">{{ format_rupiah($revTodayLaundry) }}</h3>
-            <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
+            <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 leading-tight group-hover:text-accent transition-colors">{{ format_rupiah($revTodayLaundry) }}</h3>
+            <div class="flex items-center gap-1 text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 shrink-0">
                 <i data-lucide="trending-up" class="h-3 w-3 text-accent shrink-0"></i><span class="truncate">Jasa cuci hari ini</span>
             </div>
         </a>
 
-        <a href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+        <a data-skey="omzet_sabun" href="{{ route('orders.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-amber-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Sabun</p>
-                <div class="p-2 bg-amber-500/10 text-amber-500 rounded-lg group-hover:bg-amber-500/20 transition-colors shrink-0"><i data-lucide="shopping-bag" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Omzet Sabun</p>
+                <div class="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg group-hover:bg-amber-500/20 transition-colors shrink-0"><i data-lucide="shopping-bag" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight group-hover:text-amber-400 transition-colors">{{ format_rupiah($revTodaySabun) }}</h3>
-            <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
+            <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 leading-tight group-hover:text-amber-400 transition-colors">{{ format_rupiah($revTodaySabun) }}</h3>
+            <div class="flex items-center gap-1 text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 shrink-0">
                 <i data-lucide="trending-up" class="h-3 w-3 text-amber-500 shrink-0"></i><span class="truncate">Jual sabun hari ini</span>
             </div>
         </a>
 
-        <a href="{{ route('orders.index', ['status' => 'diproses']) }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-amber-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+        <a data-skey="diproses" href="{{ route('orders.index', ['status' => 'diproses']) }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-amber-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Diproses</p>
-                <div class="p-2 bg-amber-600/10 text-amber-400 rounded-lg group-hover:bg-amber-600/20 transition-colors shrink-0"><i data-lucide="clock" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Diproses</p>
+                <div class="p-1.5 bg-amber-600/10 text-amber-400 rounded-lg group-hover:bg-amber-600/20 transition-colors shrink-0"><i data-lucide="clock" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $activeCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
-            <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Cucian sedang dicuci/setrika</div>
+            <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 leading-tight">{{ $activeCount }} <span class="text-[10px] font-normal text-slate-400">Order</span></h3>
+            <div class="text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 truncate shrink-0">Cucian sedang dicuci/setrika</div>
         </a>
 
-        <a href="{{ route('orders.index', ['status' => 'selesai']) }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-emerald-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+        <a data-skey="siap_diambil" href="{{ route('orders.index', ['status' => 'selesai']) }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-emerald-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Siap Diambil</p>
-                <div class="p-2 bg-emerald-600/10 text-emerald-400 rounded-lg group-hover:bg-emerald-600/20 transition-colors shrink-0"><i data-lucide="check-circle-2" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Siap Diambil</p>
+                <div class="p-1.5 bg-emerald-600/10 text-emerald-400 rounded-lg group-hover:bg-emerald-600/20 transition-colors shrink-0"><i data-lucide="check-circle-2" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $readyCount }} <span class="text-xs font-normal text-slate-400">Order</span></h3>
-            <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Selesai &amp; siap diserahkan</div>
+            <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 leading-tight">{{ $readyCount }} <span class="text-[10px] font-normal text-slate-400">Order</span></h3>
+            <div class="text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 truncate shrink-0">Selesai &amp; siap diserahkan</div>
         </a>
 
-        <a href="{{ route('customers.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-blue-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+        <a data-skey="pelanggan" href="{{ route('customers.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-blue-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pelanggan</p>
-                <div class="p-2 bg-blue-600/10 text-blue-400 rounded-lg group-hover:bg-blue-600/20 transition-colors shrink-0"><i data-lucide="users-2" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pelanggan</p>
+                <div class="p-1.5 bg-blue-600/10 text-blue-400 rounded-lg group-hover:bg-blue-600/20 transition-colors shrink-0"><i data-lucide="users-2" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-1 leading-tight">{{ $customersCount }} <span class="text-xs font-normal text-slate-400">Orang</span></h3>
-            <div class="text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 truncate shrink-0">Pelanggan terdaftar aktif</div>
+            <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 leading-tight">{{ $customersCount }} <span class="text-[10px] font-normal text-slate-400">Orang</span></h3>
+            <div class="text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 truncate shrink-0">Pelanggan terdaftar aktif</div>
         </a>
 
-        <a href="{{ route('expenses.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-rose-500/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px] sm:min-h-[120px]">
+        <a data-skey="pengeluaran" href="{{ route('expenses.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl hover:border-rose-500/30 transition-all group shadow-lg flex flex-col justify-between min-h-[95px] sm:min-h-[105px]">
             <div class="flex justify-between items-start gap-2">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pengeluaran</p>
-                <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg group-hover:bg-rose-500/20 transition-colors shrink-0"><i data-lucide="receipt" class="h-4.5 w-4.5"></i></div>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider truncate">Pengeluaran</p>
+                <div class="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg group-hover:bg-rose-500/20 transition-colors shrink-0"><i data-lucide="receipt" class="h-4 w-4"></i></div>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-rose-400 mt-1 leading-tight">{{ format_rupiah($expensesToday) }}</h3>
-            <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 border-t border-slate-800/50 pt-2 shrink-0">
+            <h3 class="text-base sm:text-lg font-bold text-rose-400 mt-0.5 leading-tight">{{ format_rupiah($expensesToday) }}</h3>
+            <div class="flex items-center gap-1 text-[10px] font-semibold text-slate-400 mt-2.5 border-t border-slate-800/50 pt-1.5 shrink-0">
                 <i data-lucide="trending-down" class="h-3 w-3 text-rose-400 shrink-0"></i><span class="truncate">Biaya hari ini</span>
             </div>
         </a>
@@ -119,23 +125,23 @@
             </div>
         </div>
     @else
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left column -->
-            <div class="lg:col-span-2 space-y-8">
+            <div id="dashMain" class="lg:col-span-2 space-y-6">
                 <!-- Financial report -->
-                <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
+                <div data-mkey="laporan_keuangan" class="bg-slate-900/40 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-5">
                     <div>
-                        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="dollar-sign" class="h-5 w-5 text-accent"></i><span>Laporan Pendapatan &amp; Keuangan</span></h3>
+                        <h3 class="font-bold text-base text-white flex items-center gap-2"><i data-lucide="dollar-sign" class="h-4.5 w-4.5 text-accent"></i><span>Laporan Pendapatan &amp; Keuangan</span></h3>
                         <p class="text-slate-400 text-xs mt-0.5">Analisis kinerja keuangan berkala bisnis laundry Anda</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
                             <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan Hari Ini</span>
-                                <h4 class="text-xl font-bold text-white mt-1.5">{{ format_rupiah($revToday) }}</h4>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan Hari Ini</span>
+                                <h4 class="text-lg font-bold text-white mt-1">{{ format_rupiah($revToday) }}</h4>
                             </div>
-                            <div class="mt-3 pt-2 border-t border-slate-850 flex items-center justify-between text-[10px] text-slate-500">
+                            <div class="mt-2.5 pt-1.5 border-t border-slate-850 flex items-center justify-between text-[9px] text-slate-500">
                                 <span class="truncate">Kemarin: {{ format_rupiah($revYesterday) }}</span>
                                 @php $diff = $revToday - $revYesterday; $pct = $revYesterday > 0 ? round($diff / $revYesterday * 100) : 0; @endphp
                                 @if($diff > 0)<span class="text-emerald-400 font-semibold shrink-0">+{{ $pct }}%</span>
@@ -144,23 +150,23 @@
                             </div>
                         </div>
 
-                        <div class="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
+                        <div class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
                             <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">7 Hari Terakhir</span>
-                                <h4 class="text-xl font-bold text-white mt-1.5">{{ format_rupiah($revLast7) }}</h4>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">7 Hari Terakhir</span>
+                                <h4 class="text-lg font-bold text-white mt-1">{{ format_rupiah($revLast7) }}</h4>
                             </div>
-                            <div class="mt-3 pt-2 border-t border-slate-850 flex items-center justify-between text-[10px] text-slate-500">
+                            <div class="mt-2.5 pt-1.5 border-t border-slate-850 flex items-center justify-between text-[9px] text-slate-500">
                                 <span class="truncate">L: {{ format_rupiah($last7Laundry) }}</span>
                                 <span class="truncate">S: {{ format_rupiah($last7Sabun) }}</span>
                             </div>
                         </div>
 
-                        <div class="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
+                        <div class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl flex flex-col justify-between">
                             <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan Bulan Ini</span>
-                                <h4 class="text-xl font-bold text-white mt-1.5">{{ format_rupiah($revThisMonth) }}</h4>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan Bulan Ini</span>
+                                <h4 class="text-lg font-bold text-white mt-1">{{ format_rupiah($revThisMonth) }}</h4>
                             </div>
-                            <div class="mt-3 pt-2 border-t border-slate-850 flex items-center justify-between text-[10px] text-slate-500">
+                            <div class="mt-2.5 pt-1.5 border-t border-slate-850 flex items-center justify-between text-[9px] text-slate-500">
                                 <span class="truncate">Bulan Lalu: {{ format_rupiah($revLastMonth) }}</span>
                                 @php $diffM = $revThisMonth - $revLastMonth; $pctM = $revLastMonth > 0 ? round($diffM / $revLastMonth * 100) : 0; @endphp
                                 @if($diffM > 0)<span class="text-emerald-400 font-semibold shrink-0">+{{ $pctM }}%</span>
@@ -171,20 +177,20 @@
                     </div>
 
                     <!-- Keuangan Bulan Ini: Pendapatan - Pengeluaran = Laba Bersih -->
-                    <div class="pt-4 border-t border-slate-800/60 space-y-2">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="wallet" class="h-3.5 w-3.5 text-accent"></i><span>Keuangan Bulan Ini (Laba Bersih)</span></h4>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl">
+                    <div class="pt-3 border-t border-slate-800/60 space-y-1.5">
+                        <h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="wallet" class="h-3 w-3 text-accent"></i><span>Keuangan Bulan Ini (Laba Bersih)</span></h4>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <div class="p-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan</span>
-                                <div class="text-sm sm:text-base font-bold text-emerald-450 mt-1 truncate">{{ format_rupiah($revThisMonth) }}</div>
+                                <div class="text-xs sm:text-sm font-bold text-emerald-450 mt-0.5 truncate">{{ format_rupiah($revThisMonth) }}</div>
                             </div>
-                            <a href="{{ route('expenses.index') }}" class="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl hover:border-rose-500/30 transition-all block">
+                            <a href="{{ route('expenses.index') }}" class="p-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl hover:border-rose-500/30 transition-all block">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Pengeluaran</span>
-                                <div class="text-sm sm:text-base font-bold text-rose-400 mt-1 truncate">{{ format_rupiah($expensesThisMonth) }}</div>
+                                <div class="text-xs sm:text-sm font-bold text-rose-400 mt-0.5 truncate">{{ format_rupiah($expensesThisMonth) }}</div>
                             </a>
-                            <div class="p-3 bg-slate-950/40 border rounded-xl {{ $netThisMonth >= 0 ? 'border-emerald-500/20' : 'border-rose-500/20' }}">
+                            <div class="p-2.5 bg-slate-950/40 border rounded-xl {{ $netThisMonth >= 0 ? 'border-emerald-500/20' : 'border-rose-500/20' }}">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Laba Bersih</span>
-                                <div class="text-sm sm:text-base font-black mt-1 truncate {{ $netThisMonth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">{{ format_rupiah($netThisMonth) }}</div>
+                                <div class="text-xs sm:text-sm font-black mt-0.5 truncate {{ $netThisMonth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">{{ format_rupiah($netThisMonth) }}</div>
                             </div>
                         </div>
                     </div>
@@ -198,7 +204,7 @@
                                 <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>Sabun / Produk</span>
                             </div>
                         </div>
-                        <div class="h-36 flex items-end justify-between gap-1.5 sm:gap-3 pt-6 pb-2">
+                        <div class="h-32 flex items-end justify-between gap-1.5 sm:gap-3 pt-4 pb-2">
                             @foreach($daily as $day)
                                 @php
                                     $heightPercent = min($day['total'] / $maxVal * 100, 100);
@@ -217,8 +223,8 @@
                                         </div>
                                         @endif
                                     </div>
-                                    <div class="w-full bg-slate-800/20 hover:bg-slate-850/60 transition-all rounded-t-lg h-24 flex flex-col justify-end overflow-hidden relative border border-slate-800/20 shadow-inner">
-                                        <div class="w-full rounded-t-sm flex flex-col transition-all group-hover:scale-y-105 duration-200 origin-bottom" style="height: {{ $heightPercent }}%">
+                                    <div class="w-full bg-slate-800/20 hover:bg-slate-850/60 transition-all rounded-t-lg h-20 flex flex-col justify-end overflow-hidden relative border border-slate-800/20 shadow-inner">
+                                        <div class="w-full rounded-t-sm flex flex-col transition-all duration-200 origin-bottom" style="height: {{ $heightPercent }}%">
                                             <div class="w-full bg-amber-500" style="height: {{ $soapPercent }}%"></div>
                                             <div class="w-full bg-accent" style="height: {{ $laundryPercent }}%"></div>
                                         </div>
@@ -232,10 +238,10 @@
                 </div>
 
                 <!-- Recent orders -->
-                <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
+                <div data-mkey="order_terbaru" class="bg-slate-900/40 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-5">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-lg text-white">Order Terbaru</h3>
+                            <h3 class="font-bold text-base text-white">Order Terbaru</h3>
                             <p class="text-slate-400 text-xs mt-0.5">Daftar 5 transaksi terbaru masuk</p>
                         </div>
                         <a href="{{ route('orders.index') }}" class="text-xs text-accent hover:text-accent/90 flex items-center gap-1 transition-colors font-semibold"><span>Lihat Semua</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a>
@@ -244,20 +250,20 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold">
-                                    <th class="pb-3 w-28">Nota</th><th class="pb-3">Pelanggan</th><th class="pb-3 w-28">Total</th><th class="pb-3 w-28">Status</th><th class="pb-3 w-20 text-right">Aksi</th>
+                                    <th class="pb-3 pr-3 w-28">Nota</th><th class="pb-3 px-3">Pelanggan</th><th class="pb-3 px-3 w-28">Total</th><th class="pb-3 px-3 w-28">Status</th><th class="pb-3 pl-3 w-20 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850">
                                 @foreach($recentOrders as $order)
                                     <tr class="text-sm hover:bg-slate-800/10 transition-colors group">
-                                        <td class="py-4 font-mono font-semibold text-slate-300">{{ $order->nomor_nota }}</td>
-                                        <td class="py-4">
+                                        <td class="py-4 pr-3 font-mono font-semibold text-slate-300">{{ $order->nomor_nota }}</td>
+                                        <td class="py-4 px-3">
                                             <div class="font-medium text-white group-hover:text-accent transition-colors">{{ $order->customer->nama ?? 'Umum' }}</div>
                                             <div class="text-xs text-slate-500 mt-0.5">{{ $order->customer->no_hp ?? '-' }}</div>
                                         </td>
-                                        <td class="py-4 font-bold text-slate-200">{{ format_rupiah($order->total) }}</td>
-                                        <td class="py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize {{ dash_status_badge($order->status) }}">{{ $order->status }}</span></td>
-                                        <td class="py-4 text-right">
+                                        <td class="py-4 px-3 font-bold text-slate-200">{{ format_rupiah($order->total) }}</td>
+                                        <td class="py-4 px-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize {{ dash_status_badge($order->status) }}">{{ $order->status }}</span></td>
+                                        <td class="py-4 pl-3 text-right">
                                             <a href="{{ route('orders.show', $order) }}" class="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-all" title="Detail Order"><i data-lucide="arrow-right" class="h-4 w-4"></i></a>
                                         </td>
                                     </tr>
@@ -269,11 +275,11 @@
             </div>
 
             <!-- Right column -->
-            <div class="space-y-8">
-                <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
+            <div id="dashWidgets" class="space-y-6">
+                <div data-wkey="layanan_populer" class="bg-slate-900/40 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-5">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-lg text-white">Layanan Terpopuler</h3>
+                            <h3 class="font-bold text-base text-white">Layanan Terpopuler</h3>
                             <p class="text-slate-400 text-xs mt-0.5">Layanan paling sering dipesan</p>
                         </div>
                         <a href="{{ route('services.index') }}" class="text-xs text-accent hover:text-accent/90 flex items-center gap-1 font-semibold shrink-0"><span>Kelola</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a>
@@ -298,9 +304,9 @@
                     @endif
                 </div>
 
-                <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
+                <div data-wkey="penjualan_sabun" class="bg-slate-900/40 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-5">
                     <div>
-                        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="shopping-bag" class="h-5 w-5 text-amber-500"></i><span>Penjualan Sabun &amp; Produk</span></h3>
+                        <h3 class="font-bold text-base text-white flex items-center gap-2"><i data-lucide="shopping-bag" class="h-4.5 w-4.5 text-amber-500"></i><span>Penjualan Sabun &amp; Produk</span></h3>
                         <p class="text-slate-400 text-xs mt-0.5">Ringkasan akumulasi produk sabun terjual</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center">
@@ -315,17 +321,17 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 shadow-xl space-y-6">
+                <div data-wkey="status_bayar" class="bg-slate-900/40 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-5">
                     <div>
-                        <h3 class="font-bold text-lg text-white">Status Pembayaran</h3>
+                        <h3 class="font-bold text-base text-white">Status Pembayaran</h3>
                         <p class="text-slate-400 text-xs mt-0.5">Pembagian tagihan transaksi saat ini</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-center">
-                        <a href="{{ route('orders.index', ['bayar' => 'belum']) }}" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl block hover:-translate-y-0.5 transition-all">
+                        <a href="{{ route('orders.index', ['bayar' => 'belum']) }}" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl block transition-all">
                             <div class="text-xs text-rose-400 font-semibold">Belum Bayar</div>
                             <div class="text-lg font-black text-white mt-1">{{ $belumCount }}</div>
                         </a>
-                        <a href="{{ route('orders.index', ['bayar' => 'lunas']) }}" class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl block hover:-translate-y-0.5 transition-all">
+                        <a href="{{ route('orders.index', ['bayar' => 'lunas']) }}" class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl block transition-all">
                             <div class="text-xs text-emerald-400 font-semibold">Lunas</div>
                             <div class="text-lg font-black text-white mt-1">{{ $lunasCount }}</div>
                         </a>
@@ -335,4 +341,91 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<style>
+    .dash-editing #statCards > [data-skey],
+    .dash-editing #dashWidgets > [data-wkey],
+    .dash-editing #dashMain > [data-mkey] {
+        cursor: move;
+        outline: 2px dashed var(--accent-bg, #0d9488);
+        outline-offset: 3px;
+        border-radius: 0.75rem;
+    }
+    .dash-editing #statCards > [data-skey] *,
+    .dash-editing #dashWidgets > [data-wkey] *,
+    .dash-editing #dashMain > [data-mkey] * { pointer-events: none; }
+    .drag-ghost { opacity: .35; }
+    .drag-chosen { box-shadow: 0 12px 30px rgba(0,0,0,.45); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+(function(){
+    const groups = [
+        { id: 'statCards',   attr: 'data-skey', key: 'dash_order_stat_v1' },
+        { id: 'dashMain',    attr: 'data-mkey', key: 'dash_order_main_v1' },
+        { id: 'dashWidgets', attr: 'data-wkey', key: 'dash_order_widget_v1' },
+    ];
+    let editing = false;
+    const sortables = [];
+
+    function applyOrder(g){
+        const el = document.getElementById(g.id);
+        if (!el) return;
+        let saved = [];
+        try { saved = JSON.parse(localStorage.getItem(g.key) || '[]'); } catch(e){}
+        if (!Array.isArray(saved) || !saved.length) return;
+        saved.forEach(k => {
+            const item = el.querySelector('[' + g.attr + '="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]');
+            if (item) el.appendChild(item);
+        });
+    }
+    function saveOrder(g){
+        const el = document.getElementById(g.id);
+        if (!el) return;
+        const keys = [...el.children].map(c => c.getAttribute(g.attr)).filter(Boolean);
+        try { localStorage.setItem(g.key, JSON.stringify(keys)); } catch(e){}
+    }
+    function initSortable(g){
+        const el = document.getElementById(g.id);
+        if (!el || !window.Sortable) return;
+        const s = Sortable.create(el, {
+            animation: 160,
+            disabled: true,
+            draggable: '[' + g.attr + ']',
+            ghostClass: 'drag-ghost',
+            chosenClass: 'drag-chosen',
+            onEnd: () => saveOrder(g),
+        });
+        sortables.push(s);
+    }
+
+    function setEditing(on){
+        editing = on;
+        sortables.forEach(s => s.option('disabled', !on));
+        document.body.classList.toggle('dash-editing', on);
+        const txt = document.getElementById('layoutToggleText');
+        const btn = document.getElementById('layoutToggle');
+        if (txt) txt.textContent = on ? 'Kunci Tata Letak' : 'Atur Tata Letak';
+        if (btn) {
+            btn.classList.toggle('bg-accent', on);
+            btn.classList.toggle('text-white', on);
+            btn.classList.toggle('bg-slate-800', !on);
+            btn.classList.toggle('text-slate-200', !on);
+        }
+    }
+
+    window.toggleLayoutEdit = function(){ setEditing(!editing); };
+
+    // Saat mode atur, cegah klik kartu membuka halaman (supaya geser tidak salah navigasi).
+    groups.forEach(g => {
+        const el = document.getElementById(g.id);
+        if (el) el.addEventListener('click', e => { if (editing) e.preventDefault(); }, true);
+    });
+
+    groups.forEach(applyOrder);
+    groups.forEach(initSortable);
+})();
+</script>
+@endpush
 @endsection
