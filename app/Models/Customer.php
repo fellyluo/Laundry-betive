@@ -9,10 +9,12 @@ class Customer extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['user_id', 'nama', 'no_hp', 'alamat', 'poin', 'metode_bayar', 'via_qr'];
+    protected $fillable = ['user_id', 'nama', 'no_hp', 'alamat', 'poin', 'saldo', 'metode_bayar', 'via_qr'];
 
     protected $casts = [
         'via_qr' => 'boolean',
+        'poin' => 'integer',
+        'saldo' => 'integer',
     ];
 
     public function orders()
@@ -23,5 +25,10 @@ class Customer extends Model
     public function pointTransactions()
     {
         return $this->hasMany(PointTransaction::class);
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
     }
 }

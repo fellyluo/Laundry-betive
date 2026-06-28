@@ -19,6 +19,7 @@
 
     // Data program poin (untuk fitur tukar poin di sisi pembayaran).
     $custPoin = (int) ($order->customer->poin ?? 0);
+    $custSaldo = (int) ($order->customer->saldo ?? 0);
     $poinValue = (int) ($loyalty['poin_value'] ?? 0);
     $minRedeem = (int) ($loyalty['min_redeem'] ?? 10);
     $maxByBill = $poinValue > 0 ? intdiv(max(0, $remaining), $poinValue) : 0;
@@ -103,7 +104,12 @@
                             @if($order->customer && $order->customer->alamat)<span>Alamat: {{ $order->customer->alamat }}</span>@endif
                         </div>
                         @if($order->customer)
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[11px] font-bold"><i data-lucide="award" class="h-3 w-3"></i>{{ $custPoin }} Poin</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[11px] font-bold"><i data-lucide="award" class="h-3 w-3"></i>{{ $custPoin }} Poin</span>
+                                @if($custSaldo > 0)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[11px] font-bold"><i data-lucide="wallet" class="h-3 w-3"></i>{{ format_rupiah($custSaldo) }}</span>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -321,6 +327,7 @@
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Metode Pembayaran</label>
                 <select name="metode_bayar" id="payMetode" onchange="onPayMethodChange(this.value)" class="w-full bg-slate-955 border border-slate-800 hover:border-slate-750 focus:border-accent focus:outline-none rounded-xl px-4 py-2.5 text-white font-semibold text-sm transition-all">
                     @foreach($methods as $m)<option value="{{ $m['nama'] }}">{{ $m['nama'] }}</option>@endforeach
+                    @if($custSaldo > 0)<option value="saldo">Saldo Pelanggan ({{ format_rupiah($custSaldo) }})</option>@endif
                 </select>
             </div>
             <div id="payMethodInfo" class="hidden"></div>

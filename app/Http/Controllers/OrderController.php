@@ -344,9 +344,39 @@ class OrderController extends Controller
             'metode_bayar' => 'required|string',
         ]);
 
+        $jumlah = (int) $validated['jumlah_bayar'];
+        $metode = $validated['metode_bayar'];
+
+        // Pembayaran memakai saldo dompet pelanggan.
+        if (strtolower($metode) === 'saldo') {
+            $customer = $order->customer()->first();
+            if (! $customer) {
+                return back()->with('error', 'Order ini tidak memiliki data pelanggan.');
+            }
+            if ((int) $customer->saldo < $jumlah) {
+                return back()->with('error', 'Saldo pelanggan tidak cukup (saldo: '.format_rupiah($customer->saldo).').');
+            }
+
+            DB::transaction(function () use ($order, $customer, $jumlah) {
+                $customer->decrement('saldo', $jumlah);
+                $customer->walletTransactions()->create([
+                    'user_id' => $order->user_id,
+                    'order_id' => $order->id,
+                    'type' => 'payment',
+                    'amount' => -$jumlah,
+                    'note' => 'Bayar order '.$order->nomor_nota.' dari saldo',
+                ]);
+                $order->payments()->create(['jumlah' => $jumlah, 'metode' => 'saldo']);
+                $order->syncPaymentStatus();
+            });
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Pembayaran '.format_rupiah($jumlah).' dari saldo berhasil.');
+        }
+
         $order->payments()->create([
-            'jumlah' => (int) $validated['jumlah_bayar'],
-            'metode' => $validated['metode_bayar'],
+            'jumlah' => $jumlah,
+            'metode' => $metode,
         ]);
 
         // Selaraskan status bayar + beri poin loyalitas bila pembayaran ini melunasi order.

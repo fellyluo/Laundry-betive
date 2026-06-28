@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Support\Settings;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -32,6 +34,45 @@ class CustomerController extends Controller
             ->paginate(20);
 
         return view('customers.poin', compact('customer', 'transactions'));
+    }
+
+    /** Halaman dompet saldo: saldo, form top-up, & riwayat mutasi. */
+    public function wallet(Customer $customer)
+    {
+        $transactions = $customer->walletTransactions()
+            ->with('order:id,nomor_nota')
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        $methods = collect(Settings::get()['payment_methods'])->where('aktif', true)->values();
+
+        return view('customers.saldo', compact('customer', 'transactions', 'methods'));
+    }
+
+    /** Tambah saldo (top-up) ke dompet pelanggan. */
+    public function topup(Request $request, Customer $customer)
+    {
+        $validated = $request->validate([
+            'jumlah' => 'required|integer|min:1',
+            'metode' => 'nullable|string|max:50',
+        ], [
+            'jumlah.required' => 'Nominal top-up wajib diisi.',
+            'jumlah.min' => 'Nominal top-up minimal Rp 1.',
+        ]);
+
+        DB::transaction(function () use ($customer, $validated) {
+            $customer->increment('saldo', $validated['jumlah']);
+            $customer->walletTransactions()->create([
+                'user_id' => $customer->user_id,
+                'type' => 'topup',
+                'amount' => (int) $validated['jumlah'],
+                'metode' => $validated['metode'] ?? 'cash',
+                'note' => 'Top-up saldo',
+            ]);
+        });
+
+        return redirect()->route('customers.wallet', $customer)
+            ->with('success', 'Top-up saldo berhasil: '.format_rupiah($validated['jumlah']).'.');
     }
 
     public function store(Request $request)
