@@ -27,6 +27,7 @@
         && ! in_array($order->status, ['diambil', 'dibatalkan'])
         && $poinValue > 0 && $maxRedeem >= $minRedeem;
 
+    $trackUrl = route('track.show', $order->public_token);
     $logoVal = $branding['logo_url'] ?? ($branding['logo_emoji'] ?? '🧺');
     $isImgLogo = is_string($logoVal) && str_starts_with($logoVal, 'data:image/');
     $logCount = $order->logs->count();
@@ -210,6 +211,17 @@
                 </div>
             </div>
 
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2"><i data-lucide="map-pin" class="h-4 w-4 text-accent"></i><span>Lacak Status (untuk Pelanggan)</span></h4>
+                <p class="text-[11px] text-slate-500">Bagikan link/QR ini ke pelanggan agar mereka bisa cek status sendiri tanpa login.</p>
+                <div id="trackQr" class="bg-white p-2 rounded-xl w-max mx-auto"></div>
+                <div class="bg-slate-950/60 border border-slate-850 rounded-xl p-2.5 flex items-center gap-2">
+                    <span class="text-[11px] text-slate-300 font-mono truncate flex-1">{{ $trackUrl }}</span>
+                    <button type="button" onclick="copyTrackUrl()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg shrink-0" title="Salin link"><i data-lucide="copy" class="h-4 w-4"></i></button>
+                    <a href="{{ $trackUrl }}" target="_blank" rel="noopener" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg shrink-0" title="Buka"><i data-lucide="external-link" class="h-4 w-4"></i></a>
+                </div>
+            </div>
+
             @if($order->status !== 'diambil' && $order->status !== 'dibatalkan')
                 <div class="bg-slate-900/30 border border-slate-850/50 rounded-2xl p-6 text-center shadow-md">
                     <form method="POST" action="{{ route('orders.status', $order) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan laundry ini?')">
@@ -280,6 +292,11 @@
     @endif
     <div class="my-4 border-t border-dashed border-black"></div>
     <div class="text-center text-[9px] space-y-1">
+        <p class="font-bold">Lacak status cucian Anda di:</p>
+        <p class="break-all">{{ $trackUrl }}</p>
+    </div>
+    <div class="my-2 border-t border-dashed border-black"></div>
+    <div class="text-center text-[9px] space-y-1">
         <p class="font-bold">Terima kasih atas kepercayaan Anda!</p>
         <p>Cucian Anda adalah amanah bagi kami.</p>
         <p>Harap periksa cucian saat diserahkan.</p>
@@ -344,7 +361,17 @@
 @endif
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+    const TRACK_URL = @json($trackUrl);
+    (function renderTrackQr(){
+        const box = document.getElementById('trackQr');
+        if (box && window.QRCode) {
+            new QRCode(box, { text: TRACK_URL, width: 132, height: 132, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        }
+    })();
+    function copyTrackUrl(){ navigator.clipboard?.writeText(TRACK_URL).then(()=>{}, ()=>{}); }
+
     const ORDER = @json($orderJs);
     const POIN_VALUE = {{ $poinValue }};
     const MIN_REDEEM = {{ $minRedeem }};

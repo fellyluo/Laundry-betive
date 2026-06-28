@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
     use BelongsToTenant;
 
     protected $fillable = [
-        'user_id', 'nomor_nota', 'customer_id', 'tanggal_masuk', 'estimasi_selesai',
+        'user_id', 'nomor_nota', 'public_token', 'customer_id', 'tanggal_masuk', 'estimasi_selesai',
         'status', 'total', 'status_bayar', 'poin_awarded', 'poin_redeemed', 'diskon_poin', 'catatan',
     ];
 
@@ -23,6 +24,16 @@ class Order extends Model
         'poin_redeemed' => 'integer',
         'diskon_poin' => 'integer',
     ];
+
+    /** Buat token publik unik untuk halaman lacak status pelanggan. */
+    public static function generatePublicToken(): string
+    {
+        do {
+            $token = Str::lower(Str::random(20));
+        } while (static::withoutGlobalScopes()->where('public_token', $token)->exists());
+
+        return $token;
+    }
 
     /** Tagihan bersih = total dikurangi potongan poin (tidak pernah negatif). */
     public function netTotal(): int

@@ -102,6 +102,7 @@ class RegistrationController extends Controller
                 $order = Order::create([
                     'user_id' => $user->id,
                     'nomor_nota' => $nota,
+                    'public_token' => Order::generatePublicToken(),
                     'customer_id' => $customer->id,
                     'tanggal_masuk' => now(),
                     'estimasi_selesai' => Carbon::now()->addDays(2)->setTime(17, 0),

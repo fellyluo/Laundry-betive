@@ -11,10 +11,16 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
 
 // ---- Root: tanpa landing internal (landing ada di website terpisah). Arahkan ke login. ----
 Route::redirect('/', '/login');
+
+// ---- Lacak status order (publik, untuk pelanggan tanpa login) ----
+Route::get('/lacak', [TrackingController::class, 'index'])->name('track.index');
+Route::post('/lacak', [TrackingController::class, 'find'])->name('track.find')->middleware('throttle:30,1');
+Route::get('/lacak/{token}', [TrackingController::class, 'show'])->name('track.show');
 
 // ---- Daftar jadi member/pengguna aplikasi (publik) ----
 Route::get('/daftar-member', [MemberSignupController::class, 'show'])->name('member.signup');

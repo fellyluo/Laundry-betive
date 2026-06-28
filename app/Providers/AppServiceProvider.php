@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
 use App\Support\Settings;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
                 // Halaman QR pelanggan (/daftar/{user}) -> pakai branding member terkait.
                 if (request()->routeIs('register.show', 'register.store') && ($m = request()->route('user'))) {
                     $settings = Settings::get(is_object($m) ? $m->id : (int) $m);
+                } elseif (request()->routeIs('track.show') && ($token = request()->route('token'))) {
+                    // Halaman lacak status -> pakai branding laundry pemilik order.
+                    $order = Order::withoutGlobalScopes()->where('public_token', $token)->first();
+                    $settings = $order ? Settings::get($order->user_id) : Settings::get();
                 } else {
                     $settings = Settings::get(); // member -> miliknya; super admin/guest -> platform
                 }

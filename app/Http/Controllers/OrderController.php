@@ -105,6 +105,7 @@ class OrderController extends Controller
 
             $order = Order::create([
                 'nomor_nota' => $nota,
+                'public_token' => Order::generatePublicToken(),
                 'customer_id' => $validated['customer_id'],
                 'tanggal_masuk' => now(),
                 'estimasi_selesai' => Carbon::parse($validated['estimasi_selesai']),
