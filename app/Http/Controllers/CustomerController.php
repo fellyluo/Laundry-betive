@@ -12,10 +12,10 @@ class CustomerController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         $customers = Customer::when($q !== '', function ($w) use ($q) {
-                $w->where('nama', 'like', "%{$q}%")
-                    ->orWhere('no_hp', 'like', "%{$q}%")
-                    ->orWhere('alamat', 'like', "%{$q}%");
-            })
+            $w->where('nama', 'like', "%{$q}%")
+                ->orWhere('no_hp', 'like', "%{$q}%")
+                ->orWhere('alamat', 'like', "%{$q}%");
+        })
             ->orderByDesc('created_at')
             ->paginate(12)
             ->withQueryString();
@@ -31,6 +31,7 @@ class CustomerController extends Controller
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json($customer);
         }
+
         return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil ditambahkan.');
     }
 
@@ -38,6 +39,7 @@ class CustomerController extends Controller
     {
         $data = $this->validateCustomer($request);
         $customer->update($data);
+
         return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil diperbarui.');
     }
 

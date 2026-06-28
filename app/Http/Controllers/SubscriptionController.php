@@ -13,6 +13,7 @@ class SubscriptionController extends Controller
         if (! $user || ! $user->isBlocked()) {
             return redirect()->route('dashboard');
         }
+
         return view('langganan.blocked', ['user' => $user]);
     }
 }

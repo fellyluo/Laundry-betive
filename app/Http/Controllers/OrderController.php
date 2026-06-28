@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Service;
-use App\Models\Payment;
-use App\Models\StatusLog;
 use App\Support\Settings;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -67,7 +64,7 @@ class OrderController extends Controller
             'estimasi_selesai.required' => 'Silakan tentukan estimasi selesai laundry.',
         ]);
 
-        $order = DB::transaction(function () use ($validated, $request) {
+        $order = DB::transaction(function () use ($validated) {
             // Snapshot prices + compute total
             $services = Service::whereIn('id', collect($validated['items'])->pluck('service_id'))->get()->keyBy('id');
             $total = 0;
@@ -101,7 +98,7 @@ class OrderController extends Controller
             $prefix = Carbon::today()->format('Ymd');
             $seq = Order::withoutGlobalScopes()->whereDate('tanggal_masuk', Carbon::today())->count() + 1;
             do {
-                $nota = $prefix . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
+                $nota = $prefix.'-'.str_pad($seq, 3, '0', STR_PAD_LEFT);
                 $seq++;
             } while (Order::withoutGlobalScopes()->where('nomor_nota', $nota)->exists());
 
@@ -241,10 +238,10 @@ class OrderController extends Controller
 
         // Hanya izinkan transisi status yang masuk akal (cegah loncat/ubah status final).
         $allowed = [
-            'diterima'   => ['diproses', 'dibatalkan'],
-            'diproses'   => ['selesai', 'dibatalkan'],
-            'selesai'    => ['diambil', 'dibatalkan'],
-            'diambil'    => [],
+            'diterima' => ['diproses', 'dibatalkan'],
+            'diproses' => ['selesai', 'dibatalkan'],
+            'selesai' => ['diambil', 'dibatalkan'],
+            'diambil' => [],
             'dibatalkan' => [],
         ];
 

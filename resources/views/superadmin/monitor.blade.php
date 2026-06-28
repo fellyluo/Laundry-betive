@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2"><i data-lucide="layout-dashboard" class="h-8 w-8 text-accent"></i><span>Dashboard Super Admin</span></h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2"><i data-lucide="layout-dashboard" class="h-7 w-7 text-accent"></i><span>Dashboard Super Admin</span></h1>
             <p class="text-slate-400 text-sm mt-1">Pantau berjalannya bisnis semua member, {{ format_date(now()) }}.</p>
         </div>
         <a href="{{ route('members.index') }}" class="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 w-full sm:w-auto justify-center"><i data-lucide="shield-check" class="h-5 w-5"></i><span>Kelola Member</span></a>
@@ -15,23 +15,23 @@
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
         <a href="{{ route('members.index') }}" class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl hover:border-accent/30 hover:-translate-y-0.5 transition-all group shadow-lg flex flex-col justify-between min-h-[110px]">
             <div class="flex justify-between items-start"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Member</p><div class="p-2 bg-accent/10 text-accent rounded-lg"><i data-lucide="users" class="h-4.5 w-4.5"></i></div></div>
-            <h3 class="text-xl font-black text-white">{{ $totalMembers }}</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-white">{{ $totalMembers }}</h3>
         </a>
         <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col justify-between min-h-[110px]">
             <div class="flex justify-between items-start"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Member Aktif</p><div class="p-2 bg-emerald-500/10 text-emerald-450 rounded-lg"><i data-lucide="check-circle-2" class="h-4.5 w-4.5"></i></div></div>
-            <h3 class="text-xl font-black text-emerald-450">{{ $aktif }}</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-emerald-450">{{ $aktif }}</h3>
         </div>
         <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col justify-between min-h-[110px]">
             <div class="flex justify-between items-start"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Order</p><div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="clipboard-list" class="h-4.5 w-4.5"></i></div></div>
-            <h3 class="text-xl font-black text-white">{{ $totOrders }}</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-white">{{ $totOrders }}</h3>
         </div>
         <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col justify-between min-h-[110px] col-span-2 lg:col-span-1">
             <div class="flex justify-between items-start"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Omzet</p><div class="p-2 bg-accent/10 text-accent rounded-lg"><i data-lucide="wallet" class="h-4.5 w-4.5"></i></div></div>
-            <h3 class="text-lg sm:text-xl font-black text-accent leading-tight">{{ format_rupiah($totOmzet) }}</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-accent leading-tight">{{ format_rupiah($totOmzet) }}</h3>
         </div>
         <div class="bg-slate-900/60 border border-slate-800/80 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col justify-between min-h-[110px]">
             <div class="flex justify-between items-start"><p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Pelanggan</p><div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg"><i data-lucide="users-2" class="h-4.5 w-4.5"></i></div></div>
-            <h3 class="text-xl font-black text-white">{{ $totCustomers }}</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-white">{{ $totCustomers }}</h3>
         </div>
     </div>
 

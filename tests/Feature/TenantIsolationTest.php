@@ -35,7 +35,7 @@ class TenantIsolationTest extends TestCase
         return Customer::create([
             'user_id' => $u->id,
             'nama' => $nama,
-            'no_hp' => '08' . str_pad((string) $u->id, 9, '0', STR_PAD_LEFT),
+            'no_hp' => '08'.str_pad((string) $u->id, 9, '0', STR_PAD_LEFT),
             'poin' => 0,
         ]);
     }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Support\Settings;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -11,6 +10,7 @@ class SettingController extends Controller
     public function index()
     {
         $settings = Settings::get();
+
         return view('settings.index', [
             'settings' => $settings,
             'colorPresets' => Settings::COLOR_PRESETS,
@@ -78,6 +78,7 @@ class SettingController extends Controller
         $settings = Settings::get();
         $settings['theme_mode'] = $request->input('mode');
         Settings::save($settings);
+
         return response()->json(['ok' => true, 'mode' => $settings['theme_mode']]);
     }
 }

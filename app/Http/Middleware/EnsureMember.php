@@ -18,6 +18,7 @@ class EnsureMember
         if ($user->isSuperAdmin()) {
             return redirect()->route('dashboard');
         }
+
         return $next($request);
     }
 }

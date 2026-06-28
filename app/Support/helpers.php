@@ -7,7 +7,8 @@ if (! function_exists('format_rupiah')) {
     function format_rupiah($value): string
     {
         $value = (int) round((float) $value);
-        return 'Rp ' . number_format($value, 0, ',', '.');
+
+        return 'Rp '.number_format($value, 0, ',', '.');
     }
 }
 
@@ -20,10 +21,11 @@ if (! function_exists('format_date')) {
         }
         try {
             $c = $date instanceof Carbon ? $date : Carbon::parse($date);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return '-';
         }
         $c->locale('id');
+
         return $includeTime
             ? $c->translatedFormat('j M Y H:i')
             : $c->translatedFormat('j M Y');
@@ -36,10 +38,11 @@ if (! function_exists('wa_number')) {
     {
         $clean = preg_replace('/[^0-9]/', '', $phone);
         if (str_starts_with($clean, '0')) {
-            $clean = '62' . substr($clean, 1);
+            $clean = '62'.substr($clean, 1);
         } elseif (str_starts_with($clean, '8')) {
-            $clean = '62' . $clean;
+            $clean = '62'.$clean;
         }
+
         return $clean;
     }
 }
@@ -47,6 +50,6 @@ if (! function_exists('wa_number')) {
 if (! function_exists('wa_link')) {
     function wa_link(string $phone, string $text): string
     {
-        return 'https://wa.me/' . wa_number($phone) . '?text=' . rawurlencode($text);
+        return 'https://wa.me/'.wa_number($phone).'?text='.rawurlencode($text);
     }
 }

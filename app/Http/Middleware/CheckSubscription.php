@@ -14,6 +14,7 @@ class CheckSubscription
         if ($user && $user->isBlocked()) {
             return redirect()->route('langganan.blocked');
         }
+
         return $next($request);
     }
 }

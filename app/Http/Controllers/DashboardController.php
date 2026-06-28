@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Expense;
+use App\Models\Order;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -33,22 +33,23 @@ class DashboardController extends Controller
         // ---- Hitungan ringkas langsung dari DB (sudah ter-scope tenant via global scope) ----
         $customersCount = Customer::count();
         $activeCount = Order::whereIn('status', ['diterima', 'diproses'])->count();
-        $readyCount  = Order::where('status', 'selesai')->count();
-        $belumCount  = Order::whereIn('status_bayar', ['belum', 'dp'])->count();
-        $lunasCount  = Order::where('status_bayar', 'lunas')->count();
+        $readyCount = Order::where('status', 'selesai')->count();
+        $belumCount = Order::whereIn('status_bayar', ['belum', 'dp'])->count();
+        $lunasCount = Order::where('status_bayar', 'lunas')->count();
 
         // ---- Statistik layanan & sabun (akumulasi semua waktu) via agregasi DB ----
         $serviceAgg = DB::table('order_items as oi')
             ->join('orders as o', 'o.id', '=', 'oi.order_id')
             ->leftJoin('services as s', 's.id', '=', 'oi.service_id')
             ->where('o.user_id', $uid)
-            ->groupBy(DB::raw("COALESCE(s.nama, 'Layanan Tidak Diketahui')"), DB::raw('CASE WHEN ' . self::SABUN_SQL . ' THEN 1 ELSE 0 END'))
+            ->groupBy(DB::raw("COALESCE(s.nama, 'Layanan Tidak Diketahui')"), DB::raw('CASE WHEN '.self::SABUN_SQL.' THEN 1 ELSE 0 END'))
             ->selectRaw("COALESCE(s.nama, 'Layanan Tidak Diketahui') as nama,
-                         CASE WHEN " . self::SABUN_SQL . " THEN 1 ELSE 0 END as is_sabun,
-                         SUM(oi.qty) as qty, SUM(oi.subtotal) as revenue")
+                         CASE WHEN ".self::SABUN_SQL.' THEN 1 ELSE 0 END as is_sabun,
+                         SUM(oi.qty) as qty, SUM(oi.subtotal) as revenue')
             ->get();
 
-        $soapCount = 0.0; $soapRevenue = 0;
+        $soapCount = 0.0;
+        $soapRevenue = 0;
         $serviceStats = [];
         foreach ($serviceAgg as $r) {
             if ((int) $r->is_sabun === 1) {
@@ -90,9 +91,9 @@ class DashboardController extends Controller
                 ->leftJoin('services as s', 's.id', '=', 'oi.service_id')
                 ->whereIn('oi.order_id', $orderIds)
                 ->groupBy('oi.order_id')
-                ->selectRaw("oi.order_id,
+                ->selectRaw('oi.order_id,
                              SUM(oi.subtotal) as all_sum,
-                             SUM(CASE WHEN " . self::SABUN_SQL . " THEN oi.subtotal ELSE 0 END) as sabun_sum")
+                             SUM(CASE WHEN '.self::SABUN_SQL.' THEN oi.subtotal ELSE 0 END) as sabun_sum')
                 ->get()
                 ->keyBy('order_id');
         }
@@ -210,7 +211,10 @@ class DashboardController extends Controller
             ->pluck('customers', 'user_id');
 
         $rows = [];
-        $totOrders = 0; $totOmzet = 0; $totCustomers = 0; $aktif = 0;
+        $totOrders = 0;
+        $totOmzet = 0;
+        $totCustomers = 0;
+        $aktif = 0;
 
         foreach ($members as $m) {
             $orders = (int) ($orderAgg[$m->id] ?? 0);

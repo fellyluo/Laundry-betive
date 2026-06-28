@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
@@ -49,6 +49,7 @@ class ExpenseController extends Controller
     public function destroy(Expense $expense)
     {
         $expense->delete();
+
         return redirect()->route('expenses.index')->with('success', 'Pengeluaran dihapus.');
     }
 }

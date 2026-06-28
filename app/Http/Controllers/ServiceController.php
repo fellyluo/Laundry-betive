@@ -11,24 +11,28 @@ class ServiceController extends Controller
     public function index()
     {
         $services = Service::orderBy('created_at')->get();
+
         return view('services.index', compact('services'));
     }
 
     public function store(Request $request)
     {
         Service::create($this->validateService($request));
+
         return redirect()->route('services.index')->with('success', 'Layanan berhasil ditambahkan.');
     }
 
     public function update(Request $request, Service $service)
     {
         $service->update($this->validateService($request));
+
         return redirect()->route('services.index')->with('success', 'Layanan berhasil diperbarui.');
     }
 
     public function toggle(Service $service)
     {
         $service->update(['aktif' => ! $service->aktif]);
+
         return redirect()->route('services.index');
     }
 

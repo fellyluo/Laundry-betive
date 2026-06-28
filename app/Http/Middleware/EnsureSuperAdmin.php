@@ -13,6 +13,7 @@ class EnsureSuperAdmin
         if (! Auth::check() || ! Auth::user()->isSuperAdmin()) {
             abort(403, 'Halaman ini khusus Super Admin.');
         }
+
         return $next($request);
     }
 }

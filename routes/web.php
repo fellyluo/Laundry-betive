@@ -1,17 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\MemberSignupController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SubscriptionController;
+use Illuminate\Support\Facades\Route;
 
 // ---- Root: tanpa landing internal (landing ada di website terpisah). Arahkan ke login. ----
 Route::redirect('/', '/login');

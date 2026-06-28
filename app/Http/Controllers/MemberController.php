@@ -23,6 +23,7 @@ class MemberController extends Controller
     public function settings()
     {
         $settings = Settings::get(null); // platform (user_id null)
+
         return view('superadmin.settings', [
             'settings' => $settings,
             'colorPresets' => Settings::COLOR_PRESETS,
@@ -85,7 +86,7 @@ class MemberController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'username' => 'required|string|max:50|alpha_dash|unique:users,username,' . $user->id,
+            'username' => 'required|string|max:50|alpha_dash|unique:users,username,'.$user->id,
             'password' => 'nullable|string|min:8',
         ], [
             'username.required' => 'Username wajib diisi',
@@ -162,6 +163,7 @@ class MemberController extends Controller
     {
         $this->guardSuperAdmin($user);
         $user->update(['is_active' => ! $user->is_active]);
+
         return redirect()->route('members.index')->with('success', $user->is_active ? 'Member diaktifkan.' : 'Member di-suspend.');
     }
 
@@ -171,6 +173,7 @@ class MemberController extends Controller
             'password.min' => 'Password minimal 8 karakter',
         ]);
         $user->update(['password' => Hash::make($validated['password'])]);
+
         return redirect()->route('members.index')->with('success', 'Password member diperbarui.');
     }
 

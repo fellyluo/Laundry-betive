@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -54,7 +55,7 @@ class User extends Authenticatable
     public function subscriptionExpired(): bool
     {
         return $this->subscribed_until !== null
-            && $this->subscribed_until->lt(\Illuminate\Support\Carbon::today());
+            && $this->subscribed_until->lt(Carbon::today());
     }
 
     /** Terblokir: member yang di-suspend atau masa sewanya habis. Super admin tidak pernah terblokir. */
@@ -63,6 +64,7 @@ class User extends Authenticatable
         if ($this->isSuperAdmin()) {
             return false;
         }
+
         return ! $this->is_active || $this->subscriptionExpired();
     }
 
@@ -72,6 +74,7 @@ class User extends Authenticatable
         if ($this->subscribed_until === null) {
             return null;
         }
-        return \Illuminate\Support\Carbon::today()->diffInDays($this->subscribed_until, false);
+
+        return Carbon::today()->diffInDays($this->subscribed_until, false);
     }
 }

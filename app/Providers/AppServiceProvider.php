@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
 use App\Support\Settings;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,11 +35,11 @@ class AppServiceProvider extends ServiceProvider
                     $settings = Settings::get(); // member -> miliknya; super admin/guest -> platform
                 }
                 $view->with('appSettings', $settings)
-                     ->with('appTheme', Settings::theme($settings));
+                    ->with('appTheme', Settings::theme($settings));
             } catch (\Throwable $e) {
                 $defaults = Settings::defaults();
                 $view->with('appSettings', $defaults)
-                     ->with('appTheme', Settings::theme($defaults));
+                    ->with('appTheme', Settings::theme($defaults));
             }
         });
     }

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Service;
 use App\Models\Order;
+use App\Models\Service;
 use App\Models\User;
 use App\Support\Settings;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class RegistrationController extends Controller
 {
@@ -95,7 +95,7 @@ class RegistrationController extends Controller
                 $prefix = Carbon::today()->format('Ymd');
                 $seq = Order::withoutGlobalScopes()->whereDate('tanggal_masuk', Carbon::today())->count() + 1;
                 do {
-                    $nota = $prefix . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
+                    $nota = $prefix.'-'.str_pad($seq, 3, '0', STR_PAD_LEFT);
                     $seq++;
                 } while (Order::withoutGlobalScopes()->where('nomor_nota', $nota)->exists());
 
