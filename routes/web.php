@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
             Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
             Route::post('/orders/{order}/payment', [OrderController::class, 'addPayment'])->name('orders.payment');
+            Route::post('/orders/{order}/redeem', [OrderController::class, 'redeemPoints'])->name('orders.redeem');
 
             // Customers
             Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');

@@ -15,6 +15,8 @@ class SettingController extends Controller
             'settings' => $settings,
             'colorPresets' => Settings::COLOR_PRESETS,
             'bgPresets' => Settings::BG_PRESETS,
+            'loyalty' => Settings::loyalty(),
+            'whatsapp' => Settings::whatsapp(),
         ]);
     }
 
@@ -37,8 +39,14 @@ class SettingController extends Controller
             'payment_methods.*.aktif' => 'nullable',
             'payment_methods.*.no_rek' => 'nullable|string|max:120',
             'payment_methods.*.qris' => 'nullable|string',
+            'loyalty_earn_rate' => 'nullable|integer|min:100',
+            'loyalty_poin_value' => 'nullable|integer|min:0',
+            'loyalty_min_redeem' => 'nullable|integer|min:1',
+            'wa_token' => 'nullable|string|max:255',
+            'wa_template_selesai' => 'nullable|string|max:1000',
         ], [
             'nama_laundry.required' => 'Nama laundry tidak boleh kosong.',
+            'loyalty_earn_rate.min' => 'Rp per poin minimal 100.',
         ]);
 
         $methods = collect($validated['payment_methods'] ?? [])->map(fn ($m) => [
@@ -67,6 +75,16 @@ class SettingController extends Controller
             'theme_bg' => $validated['theme_bg'],
             'theme_mode' => $validated['theme_mode'],
             'payment_methods' => $methods,
+            'loyalty' => [
+                'earn_rate' => max(100, (int) ($validated['loyalty_earn_rate'] ?? 10000)),
+                'poin_value' => max(0, (int) ($validated['loyalty_poin_value'] ?? 1000)),
+                'min_redeem' => max(1, (int) ($validated['loyalty_min_redeem'] ?? 10)),
+            ],
+            'whatsapp' => [
+                'enabled' => filter_var($request->input('wa_enabled', false), FILTER_VALIDATE_BOOLEAN),
+                'token' => trim((string) ($validated['wa_token'] ?? '')),
+                'template_selesai' => trim((string) ($validated['wa_template_selesai'] ?? '')) ?: Settings::DEFAULT_WA_TEMPLATE,
+            ],
         ]);
 
         return redirect()->route('settings.index')->with('success', 'Pengaturan berhasil disimpan.');

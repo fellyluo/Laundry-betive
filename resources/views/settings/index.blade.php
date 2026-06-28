@@ -77,6 +77,51 @@
                     </div>
                 </div>
 
+                <!-- 1b. Program Poin Loyalitas -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 text-accent"></i><span>Program Poin Loyalitas</span></h3>
+                    <p class="text-[11px] text-slate-500 -mt-1">Poin diberikan otomatis saat order <span class="text-emerald-400 font-semibold">LUNAS</span>, dan bisa ditukar pelanggan jadi potongan harga.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Belanja per 1 Poin (Rp)</label>
+                            <input type="number" name="loyalty_earn_rate" min="100" step="100" value="{{ $loyalty['earn_rate'] }}" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white focus:outline-none transition-all text-sm font-mono">
+                            <p class="text-[10px] text-slate-550">Tiap belanja Rp {{ number_format($loyalty['earn_rate'], 0, ',', '.') }} = 1 poin.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Nilai 1 Poin (Rp)</label>
+                            <input type="number" name="loyalty_poin_value" min="0" step="100" value="{{ $loyalty['poin_value'] }}" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white focus:outline-none transition-all text-sm font-mono">
+                            <p class="text-[10px] text-slate-550">1 poin = potongan Rp {{ number_format($loyalty['poin_value'], 0, ',', '.') }}. Isi 0 untuk matikan penukaran.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Minimal Tukar (Poin)</label>
+                            <input type="number" name="loyalty_min_redeem" min="1" step="1" value="{{ $loyalty['min_redeem'] }}" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white focus:outline-none transition-all text-sm font-mono">
+                            <p class="text-[10px] text-slate-550">Poin minimum untuk sekali penukaran.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1c. Notifikasi WhatsApp -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 flex items-center gap-2"><i data-lucide="message-circle" class="h-5 w-5 text-emerald-400"></i><span>Notifikasi WhatsApp Otomatis</span></h3>
+                    <p class="text-[11px] text-slate-500 -mt-1">Saat status order diubah ke <span class="text-emerald-400 font-semibold">SELESAI</span>, pesan WhatsApp otomatis dikirim ke pelanggan via <a href="https://fonnte.com" target="_blank" class="text-accent underline">Fonnte</a>. Daftar di Fonnte, hubungkan nomor WA laundry, lalu tempel token perangkatnya di bawah.</p>
+
+                    <label class="flex items-center gap-3 p-3 bg-slate-950/50 border border-slate-850 rounded-xl cursor-pointer">
+                        <input type="checkbox" name="wa_enabled" value="1" {{ $whatsapp['enabled'] ? 'checked' : '' }} class="w-4 h-4 accent-emerald-500">
+                        <span class="text-sm font-semibold text-slate-200">Aktifkan notifikasi WhatsApp otomatis</span>
+                    </label>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Token Fonnte</label>
+                        <input type="text" name="wa_token" value="{{ $whatsapp['token'] }}" placeholder="Tempel token perangkat Fonnte di sini" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white focus:outline-none transition-all text-sm font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Template Pesan "Selesai"</label>
+                        <textarea name="wa_template_selesai" rows="3" class="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-accent rounded-xl px-4 py-2.5 text-white focus:outline-none transition-all text-sm leading-relaxed">{{ $whatsapp['template_selesai'] }}</textarea>
+                        <p class="text-[10px] text-slate-550 mt-1.5">Placeholder yang tersedia: <code class="text-accent">{nama}</code> <code class="text-accent">{nota}</code> <code class="text-accent">{laundry}</code> <code class="text-accent">{total}</code> <code class="text-accent">{sisa}</code></p>
+                    </div>
+                </div>
+
                 <!-- 2. Theme colors -->
                 <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                     <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 flex items-center gap-2"><span class="w-2 h-5 bg-accent rounded-full"></span><span>Warna Tema Aplikasi</span></h3>

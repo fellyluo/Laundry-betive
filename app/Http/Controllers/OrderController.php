@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Service;
 use App\Support\Settings;
+use App\Support\WhatsappNotifier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -220,6 +221,7 @@ class OrderController extends Controller
             'order' => $order,
             'branding' => $settings['branding'],
             'methods' => $methods,
+            'loyalty' => Settings::loyalty($order->user_id),
         ]);
     }
 
@@ -253,7 +255,85 @@ class OrderController extends Controller
         $order->update(['status' => $target]);
         $order->logs()->create(['status' => $target]);
 
+        // Pembatalan: tarik kembali poin yang sempat diberikan & kembalikan poin yang sempat ditukar.
+        if ($target === 'dibatalkan') {
+            $order->reverseLoyaltyOnCancel();
+        }
+
+        // Cucian selesai: kirim notifikasi WhatsApp otomatis (jika diaktifkan member).
+        if ($target === 'selesai' && Settings::whatsapp($order->user_id)['enabled']) {
+            if (! WhatsappNotifier::sendOrderDone($order)) {
+                return redirect()->route('orders.show', $order)
+                    ->with('error', 'Status diperbarui, tapi notifikasi WhatsApp gagal terkirim. Periksa token Fonnte & nomor HP pelanggan.');
+            }
+
+            return redirect()->route('orders.show', $order)->with('success', 'Status diperbarui & notifikasi WhatsApp terkirim ke pelanggan.');
+        }
+
         return redirect()->route('orders.show', $order);
+    }
+
+    /** Tukar poin pelanggan jadi potongan (diskon) pada order yang belum lunas. */
+    public function redeemPoints(Request $request, Order $order)
+    {
+        if (in_array($order->status, ['diambil', 'dibatalkan'], true)) {
+            return back()->with('error', 'Order sudah diambil/dibatalkan — poin tidak bisa ditukar.');
+        }
+        if ($order->status_bayar === 'lunas') {
+            return back()->with('error', 'Order sudah lunas — tidak perlu menukar poin.');
+        }
+
+        $validated = $request->validate([
+            'poin' => 'required|integer|min:1',
+        ]);
+        $poin = (int) $validated['poin'];
+
+        $customer = $order->customer()->first();
+        if (! $customer) {
+            return back()->with('error', 'Order ini tidak memiliki data pelanggan.');
+        }
+
+        $loyalty = Settings::loyalty($order->user_id);
+        $poinValue = $loyalty['poin_value'];
+        $minRedeem = $loyalty['min_redeem'];
+
+        if ($poinValue <= 0) {
+            return back()->with('error', 'Penukaran poin sedang dinonaktifkan.');
+        }
+        if ($poin < $minRedeem) {
+            return back()->with('error', "Minimal penukaran {$minRedeem} poin.");
+        }
+        if ($poin > (int) $customer->poin) {
+            return back()->with('error', 'Poin pelanggan tidak mencukupi.');
+        }
+
+        $paid = (int) $order->payments()->sum('jumlah');
+        $sisaTagihan = $order->netTotal() - $paid; // jangan sampai potongan bikin lebih bayar
+        $disc = $poin * $poinValue;
+        if ($disc > $sisaTagihan) {
+            return back()->with('error', 'Potongan poin melebihi sisa tagihan order.');
+        }
+
+        DB::transaction(function () use ($order, $customer, $poin, $disc) {
+            $customer->decrement('poin', $poin);
+            $order->diskon_poin = (int) $order->diskon_poin + $disc;
+            $order->poin_redeemed = (int) $order->poin_redeemed + $poin;
+            $order->save();
+
+            $order->pointTransactions()->create([
+                'user_id' => $order->user_id,
+                'customer_id' => $order->customer_id,
+                'type' => 'redeem',
+                'points' => -$poin,
+                'note' => 'Tukar poin jadi potongan order '.$order->nomor_nota,
+            ]);
+
+            // Potongan bisa membuat order langsung lunas -> selaraskan status & poin earn.
+            $order->syncPaymentStatus();
+        });
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', "Berhasil menukar {$poin} poin menjadi potongan ".format_rupiah($disc).'.');
     }
 
     public function addPayment(Request $request, Order $order)

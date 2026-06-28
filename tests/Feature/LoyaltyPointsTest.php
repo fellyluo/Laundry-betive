@@ -117,6 +117,72 @@ class LoyaltyPointsTest extends TestCase
         $this->assertSame(3, (int) $this->customer->fresh()->poin);
     }
 
+    public function test_tukar_poin_jadi_potongan_order(): void
+    {
+        // Order pertama lunas (200.000) -> 20 poin.
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'lunas',
+            'items' => [['service_id' => $this->service->id, 'qty' => 20]],
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(20, (int) $this->customer->fresh()->poin);
+
+        // Order kedua belum bayar (30.000).
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'belum',
+            'items' => [['service_id' => $this->service->id, 'qty' => 3]],
+        ])->assertSessionHasNoErrors();
+        $order = Order::orderByDesc('id')->firstOrFail();
+
+        // Tukar 10 poin -> potongan 10.000 (poin_value default 1.000).
+        $this->post(route('orders.redeem', $order), ['poin' => 10])->assertSessionHasNoErrors();
+        $order->refresh();
+        $this->assertSame(10000, (int) $order->diskon_poin);
+        $this->assertSame(10, (int) $order->poin_redeemed);
+        $this->assertSame(10, (int) $this->customer->fresh()->poin); // 20 - 10
+
+        // Bayar sisa 20.000 -> lunas + earn 2 poin (dari net 20.000).
+        $this->post(route('orders.payment', $order), ['jumlah_bayar' => 20000, 'metode_bayar' => 'cash'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame('lunas', $order->fresh()->status_bayar);
+        $this->assertSame(12, (int) $this->customer->fresh()->poin); // 10 + 2
+    }
+
+    public function test_redeem_ditolak_jika_poin_tidak_cukup(): void
+    {
+        // Pelanggan punya 0 poin -> penukaran ditolak, tidak ada potongan.
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'belum',
+            'items' => [['service_id' => $this->service->id, 'qty' => 3]],
+        ])->assertSessionHasNoErrors();
+        $order = Order::firstOrFail();
+
+        $this->post(route('orders.redeem', $order), ['poin' => 10])->assertSessionHas('error');
+        $this->assertSame(0, (int) $order->fresh()->diskon_poin);
+    }
+
+    public function test_pembatalan_order_lunas_menarik_kembali_poin(): void
+    {
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'lunas',
+            'items' => [['service_id' => $this->service->id, 'qty' => 4]], // 40.000 -> 4 poin
+        ])->assertSessionHasNoErrors();
+        $order = Order::firstOrFail();
+        $this->assertSame(4, (int) $this->customer->fresh()->poin);
+
+        // Batalkan -> poin yang sempat diberikan ditarik kembali.
+        $this->post(route('orders.status', $order), ['status' => 'dibatalkan'])->assertSessionHasNoErrors();
+        $this->assertSame('dibatalkan', $order->fresh()->status);
+        $this->assertSame(0, (int) $this->customer->fresh()->poin);
+    }
+
     public function test_dashboard_member_tampil_tanpa_error(): void
     {
         // Satu order lunas agar agregasi dashboard mengeksekusi semua cabang query.

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 
 class Settings
 {
+    /** Template default notifikasi WhatsApp saat cucian selesai. */
+    public const DEFAULT_WA_TEMPLATE = 'Halo {nama}, cucian Anda dengan nota *{nota}* di *{laundry}* sudah *SELESAI* dan siap diambil. 🧺 Sisa tagihan: {sisa}. Terima kasih!';
+
     /** Accent color presets (key => [accent, hover]) */
     public const COLOR_PRESETS = [
         'teal' => ['accent' => '#0d9488', 'hover' => '#0f766e'],
@@ -53,6 +56,43 @@ class Settings
                 ['id' => 'qris', 'nama' => 'QRIS (Gopay/Ovo/Dana)', 'aktif' => true],
                 ['id' => 'transfer', 'nama' => 'Transfer Bank BCA', 'aktif' => true],
             ],
+            'loyalty' => [
+                'earn_rate' => 10000,  // Rp belanja untuk dapat 1 poin (saat order lunas)
+                'poin_value' => 1000,  // nilai potongan (Rp) per 1 poin saat ditukar
+                'min_redeem' => 10,    // minimal poin untuk sekali penukaran
+            ],
+            'whatsapp' => [
+                'enabled' => false,
+                'token' => '',
+                'template_selesai' => self::DEFAULT_WA_TEMPLATE,
+            ],
+        ];
+    }
+
+    /** Konfigurasi notifikasi WhatsApp (ternormalisasi). */
+    public static function whatsapp(?int $userId = null): array
+    {
+        $s = func_num_args() === 0 ? self::get() : self::get($userId);
+        $w = is_array($s['whatsapp'] ?? null) ? $s['whatsapp'] : [];
+        $tpl = trim((string) ($w['template_selesai'] ?? ''));
+
+        return [
+            'enabled' => (bool) ($w['enabled'] ?? false),
+            'token' => trim((string) ($w['token'] ?? '')),
+            'template_selesai' => $tpl !== '' ? $tpl : self::DEFAULT_WA_TEMPLATE,
+        ];
+    }
+
+    /** Konfigurasi loyalitas (ternormalisasi & aman dipakai untuk perhitungan). */
+    public static function loyalty(?int $userId = null): array
+    {
+        $s = func_num_args() === 0 ? self::get() : self::get($userId);
+        $l = is_array($s['loyalty'] ?? null) ? $s['loyalty'] : [];
+
+        return [
+            'earn_rate' => max(0, (int) ($l['earn_rate'] ?? 10000)),
+            'poin_value' => max(0, (int) ($l['poin_value'] ?? 1000)),
+            'min_redeem' => max(1, (int) ($l['min_redeem'] ?? 10)),
         ];
     }
 

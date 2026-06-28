@@ -13,7 +13,20 @@
         };
     }
     $totalPaid = $order->payments->sum('jumlah');
-    $remaining = $order->total - $totalPaid;
+    $diskonPoin = (int) $order->diskon_poin;
+    $netTotal = max(0, $order->total - $diskonPoin);
+    $remaining = $netTotal - $totalPaid;
+
+    // Data program poin (untuk fitur tukar poin di sisi pembayaran).
+    $custPoin = (int) ($order->customer->poin ?? 0);
+    $poinValue = (int) ($loyalty['poin_value'] ?? 0);
+    $minRedeem = (int) ($loyalty['min_redeem'] ?? 10);
+    $maxByBill = $poinValue > 0 ? intdiv(max(0, $remaining), $poinValue) : 0;
+    $maxRedeem = min($custPoin, $maxByBill);
+    $canRedeem = $order->status_bayar !== 'lunas'
+        && ! in_array($order->status, ['diambil', 'dibatalkan'])
+        && $poinValue > 0 && $maxRedeem >= $minRedeem;
+
     $logoVal = $branding['logo_url'] ?? ($branding['logo_emoji'] ?? '🧺');
     $isImgLogo = is_string($logoVal) && str_starts_with($logoVal, 'data:image/');
     $logCount = $order->logs->count();
@@ -22,6 +35,8 @@
         'status' => $order->status,
         'status_bayar' => $order->status_bayar,
         'total' => $order->total,
+        'diskon' => $diskonPoin,
+        'net' => $netTotal,
         'paid' => $totalPaid,
         'customer' => ['nama' => $order->customer->nama ?? 'Umum', 'no_hp' => $order->customer->no_hp ?? ''],
         'items' => $order->items->map(fn($i) => ['nama' => $i->service->nama ?? 'Layanan', 'qty' => (float) $i->qty, 'satuan' => $i->service->satuan ?? '', 'harga' => $i->harga_satuan, 'subtotal' => $i->subtotal])->values(),
@@ -33,6 +48,13 @@
 <!-- ===== WEB SCREEN (no-print) ===== -->
 <div class="space-y-8 pb-12 no-print max-w-5xl">
     <a href="{{ route('orders.index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors text-sm font-semibold"><i data-lucide="arrow-left" class="h-4 w-4"></i><span>Kembali ke Daftar Order</span></a>
+
+    @if(session('success'))
+        <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center gap-2 animate-in"><i data-lucide="check-circle-2" class="h-5 w-5 shrink-0"></i><span>{{ session('success') }}</span></div>
+    @endif
+    @if(session('error'))
+        <div class="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl flex items-center gap-2"><i data-lucide="alert-triangle" class="h-5 w-5 shrink-0"></i><span>{{ session('error') }}</span></div>
+    @endif
 
     <!-- Action header -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
@@ -79,6 +101,9 @@
                             <span>HP: {{ $order->customer->no_hp ?? '-' }}</span>
                             @if($order->customer && $order->customer->alamat)<span>Alamat: {{ $order->customer->alamat }}</span>@endif
                         </div>
+                        @if($order->customer)
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[11px] font-bold"><i data-lucide="award" class="h-3 w-3"></i>{{ $custPoin }} Poin</span>
+                        @endif
                     </div>
                 </div>
 
@@ -88,16 +113,16 @@
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
                                 <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold">
-                                    <th class="pb-3">Layanan</th><th class="pb-3 text-center w-24">Jumlah</th><th class="pb-3 text-right w-28">Harga Satuan</th><th class="pb-3 text-right w-32">Subtotal</th>
+                                    <th class="pb-3 pr-3">Layanan</th><th class="pb-3 px-3 text-center w-24">Jumlah</th><th class="pb-3 px-3 text-right w-28">Harga Satuan</th><th class="pb-3 pl-3 text-right w-32">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-850/60 text-slate-300">
                                 @foreach($order->items as $item)
                                     <tr>
-                                        <td class="py-4 font-semibold text-slate-200">{{ $item->service->nama ?? 'Item' }}</td>
-                                        <td class="py-4 text-center font-mono">{{ rtrim(rtrim(number_format($item->qty,2,'.',''),'0'),'.') }} <span class="text-xs text-slate-500 uppercase">{{ $item->service->satuan ?? '' }}</span></td>
-                                        <td class="py-4 text-right font-mono">{{ format_rupiah($item->harga_satuan) }}</td>
-                                        <td class="py-4 text-right font-bold font-mono text-accent">{{ format_rupiah($item->subtotal) }}</td>
+                                        <td class="py-4 pr-3 font-semibold text-slate-200">{{ $item->service->nama ?? 'Item' }}</td>
+                                        <td class="py-4 px-3 text-center font-mono">{{ rtrim(rtrim(number_format($item->qty,2,'.',''),'0'),'.') }} <span class="text-xs text-slate-500 uppercase">{{ $item->service->satuan ?? '' }}</span></td>
+                                        <td class="py-4 px-3 text-right font-mono">{{ format_rupiah($item->harga_satuan) }}</td>
+                                        <td class="py-4 pl-3 text-right font-bold font-mono text-accent">{{ format_rupiah($item->subtotal) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -105,6 +130,10 @@
                     </div>
                     <div class="flex flex-col gap-2 items-end border-t border-slate-850 pt-5 text-sm">
                         <div class="flex justify-between w-64 text-slate-450"><span>Subtotal Tagihan:</span><span class="font-mono font-bold text-slate-300">{{ format_rupiah($order->total) }}</span></div>
+                        @if($diskonPoin > 0)
+                            <div class="flex justify-between w-64 text-amber-400"><span class="flex items-center gap-1"><i data-lucide="award" class="h-3.5 w-3.5"></i>Potongan Poin ({{ $order->poin_redeemed }}):</span><span class="font-mono font-bold">- {{ format_rupiah($diskonPoin) }}</span></div>
+                            <div class="flex justify-between w-64 text-slate-450"><span>Total Setelah Potongan:</span><span class="font-mono font-bold text-slate-200">{{ format_rupiah($netTotal) }}</span></div>
+                        @endif
                         <div class="flex justify-between w-64 text-slate-450"><span>Sudah Dibayar:</span><span class="font-mono font-bold text-emerald-450">{{ format_rupiah($totalPaid) }}</span></div>
                         <div class="flex justify-between w-64 border-t border-slate-850 pt-2 text-base font-extrabold text-white"><span>Sisa Tagihan:</span><span class="font-mono text-accent">{{ format_rupiah($remaining) }}</span></div>
                     </div>
@@ -156,6 +185,23 @@
                 @endif
             </div>
 
+            @if($order->customer && $custPoin > 0 && $poinValue > 0 && ! in_array($order->status, ['diambil', 'dibatalkan']))
+                <div class="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-amber-300 text-sm flex items-center gap-2"><i data-lucide="award" class="h-4 w-4"></i><span>Poin Loyalitas</span></h4>
+                        <span class="text-xs font-bold text-amber-400">{{ $custPoin }} poin</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">1 poin = potongan {{ format_rupiah($poinValue) }}.</p>
+                    @if($canRedeem)
+                        <button onclick="openRedeemModal()" class="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2.5 text-xs rounded-xl transition-all shadow-md"><i data-lucide="ticket" class="h-4 w-4"></i><span>Tukar Poin Jadi Potongan</span></button>
+                    @elseif($order->status_bayar === 'lunas')
+                        <p class="text-[11px] text-slate-500 italic">Order sudah lunas — penukaran tidak tersedia.</p>
+                    @else
+                        <p class="text-[11px] text-slate-500 italic">Poin belum cukup untuk ditukar (minimal {{ $minRedeem }} poin).</p>
+                    @endif
+                </div>
+            @endif
+
             <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                 <h4 class="font-bold text-white text-sm">Ukuran Cetak Thermal</h4>
                 <div class="grid grid-cols-2 gap-2">
@@ -203,6 +249,10 @@
     <div class="my-4 border-t border-dashed border-black"></div>
     <div class="space-y-1 text-[10px]">
         <div class="flex justify-between font-extrabold text-sm"><span>TOTAL TAGIHAN:</span><span>{{ format_rupiah($order->total) }}</span></div>
+        @if($diskonPoin > 0)
+            <div class="flex justify-between"><span>Potongan Poin ({{ $order->poin_redeemed }}):</span><span>- {{ format_rupiah($diskonPoin) }}</span></div>
+            <div class="flex justify-between font-bold"><span>Total Bayar:</span><span>{{ format_rupiah($netTotal) }}</span></div>
+        @endif
         <div class="flex justify-between"><span>Jumlah Dibayar:</span><span>{{ format_rupiah($totalPaid) }}</span></div>
         <div class="flex justify-between border-t border-dotted border-black pt-1"><span>Sisa Tagihan:</span><span class="font-bold">{{ format_rupiah($remaining) }}</span></div>
         <div class="flex justify-between mt-2 font-bold uppercase border border-black p-1 text-center items-center justify-center"><span>Status Bayar: {{ $order->status_bayar }}</span></div>
@@ -265,9 +315,54 @@
     </div>
 </div>
 
+@if($canRedeem)
+<!-- Redeem poin modal -->
+<div id="redeemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in">
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 text-amber-400"></i><span>Tukar Poin Jadi Potongan</span></h2>
+            <button type="button" onclick="closeRedeemModal()" class="text-slate-400 hover:text-slate-200 transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <form method="POST" action="{{ route('orders.redeem', $order) }}" class="p-6 space-y-4" onsubmit="return validateRedeem(event)">
+            @csrf
+            <div class="flex justify-between text-xs text-slate-400">
+                <span>Saldo poin pelanggan: <span class="font-bold text-amber-400">{{ $custPoin }}</span></span>
+                <span>Maks. tukar: <span class="font-bold text-amber-400">{{ $maxRedeem }}</span></span>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Jumlah Poin Ditukar</label>
+                <input type="number" name="poin" id="redeemPoin" value="{{ $maxRedeem }}" min="{{ $minRedeem }}" max="{{ $maxRedeem }}" oninput="updateRedeemPreview()" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-amber-500 rounded-xl px-4 py-2.5 text-white font-bold text-base focus:outline-none transition-all">
+                <span class="text-xs text-slate-500 mt-1 block">Estimasi potongan: <span id="redeemPreview" class="font-semibold text-amber-400">{{ format_rupiah($maxRedeem * $poinValue) }}</span></span>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <button type="button" onclick="closeRedeemModal()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-350 hover:border-slate-700 text-sm font-semibold transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-semibold shadow-lg transition-colors">Tukar Poin</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
 @push('scripts')
 <script>
     const ORDER = @json($orderJs);
+    const POIN_VALUE = {{ $poinValue }};
+    const MIN_REDEEM = {{ $minRedeem }};
+    const MAX_REDEEM = {{ $maxRedeem }};
+
+    function openRedeemModal(){ const m=document.getElementById('redeemModal'); if(m){ m.classList.remove('hidden'); m.classList.add('flex'); } }
+    function closeRedeemModal(){ const m=document.getElementById('redeemModal'); if(m){ m.classList.add('hidden'); m.classList.remove('flex'); } }
+    function updateRedeemPreview(){
+        let v = parseInt(document.getElementById('redeemPoin').value || '0', 10);
+        if (isNaN(v) || v < 0) v = 0;
+        document.getElementById('redeemPreview').textContent = 'Rp ' + (v * POIN_VALUE).toLocaleString('id-ID');
+    }
+    function validateRedeem(e){
+        const v = parseInt(document.getElementById('redeemPoin').value || '0', 10);
+        if (isNaN(v) || v < MIN_REDEEM){ alert('Minimal penukaran ' + MIN_REDEEM + ' poin.'); e.preventDefault(); return false; }
+        if (v > MAX_REDEEM){ alert('Maksimal penukaran ' + MAX_REDEEM + ' poin.'); e.preventDefault(); return false; }
+        return true;
+    }
 
     function rupiah(v){ return 'Rp ' + Math.round(v).toLocaleString('id-ID'); }
     function fmtQty(q){ return (Math.round(q*100)/100).toString(); }
@@ -286,13 +381,14 @@
 
     function sendWhatsApp() {
         const o = ORDER;
-        const unpaid = o.total - o.paid;
+        const unpaid = o.net - o.paid;
         let text = `Halo *${o.customer.nama}*,\n`;
         if (o.status === 'selesai') text += `Laundry Anda dengan nomor nota *${o.nomor_nota}* sudah *SELESAI* dan siap untuk diambil. 🧺\n\n`;
         else text += `Berikut rincian pesanan laundry Anda dengan nomor nota *${o.nomor_nota}* di *${o.laundryName}*. 🧺\n\n`;
         text += `Rincian Layanan:\n`;
         o.items.forEach(it => { text += `- ${it.nama}: ${fmtQty(it.qty)} ${it.satuan} x ${rupiah(it.harga)} = ${rupiah(it.subtotal)}\n`; });
         text += `\n*Total Biaya*: *${rupiah(o.total)}*\n`;
+        if (o.diskon > 0) text += `*Potongan Poin*: -${rupiah(o.diskon)}\n*Total Bayar*: *${rupiah(o.net)}*\n`;
         if (unpaid > 0) text += `*Sisa Tagihan*: *${rupiah(unpaid)}* (Status: Belum Bayar)\n\n`;
         else text += `*Status Bayar*: *LUNAS* (Terima kasih) ✅\n\n`;
         text += `Silakan berkunjung kembali untuk mengambil cucian Anda.\nTerima kasih telah berlangganan di *${o.laundryName}*! ✨`;
