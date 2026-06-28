@@ -183,6 +183,22 @@ class LoyaltyPointsTest extends TestCase
         $this->assertSame(0, (int) $this->customer->fresh()->poin);
     }
 
+    public function test_halaman_riwayat_poin_menampilkan_ledger(): void
+    {
+        // Order lunas -> tercatat entri ledger 'earn'.
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'lunas',
+            'items' => [['service_id' => $this->service->id, 'qty' => 3]],
+        ])->assertSessionHasNoErrors();
+
+        $res = $this->get(route('customers.points', $this->customer));
+        $res->assertOk();
+        $res->assertSee('Riwayat Mutasi Poin');
+        $res->assertSee('Dapat Poin');
+    }
+
     public function test_dashboard_member_tampil_tanpa_error(): void
     {
         // Satu order lunas agar agregasi dashboard mengeksekusi semua cabang query.

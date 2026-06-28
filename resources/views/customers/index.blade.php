@@ -84,6 +84,7 @@
                         @endif
                     </div>
                     <div class="flex justify-end gap-2 border-t border-slate-800/80 mt-6 pt-4">
+                        <a href="{{ route('customers.points', $customer) }}" class="p-2 bg-slate-800 hover:bg-amber-500/15 text-slate-200 hover:text-amber-400 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold px-3" title="Riwayat Poin"><i data-lucide="award" class="h-3.5 w-3.5"></i><span>Poin</span></a>
                         <button onclick='openEditCustomer(@json($customer))' class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold px-3"><i data-lucide="edit-3" class="h-3.5 w-3.5"></i><span>Edit</span></button>
                         <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini?')">
                             @csrf @method('DELETE')

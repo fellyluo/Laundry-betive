@@ -23,6 +23,17 @@ class CustomerController extends Controller
         return view('customers.index', compact('customers', 'q'));
     }
 
+    /** Riwayat poin (ledger) seorang pelanggan. */
+    public function points(Customer $customer)
+    {
+        $transactions = $customer->pointTransactions()
+            ->with('order:id,nomor_nota')
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        return view('customers.poin', compact('customer', 'transactions'));
+    }
+
     public function store(Request $request)
     {
         $data = $this->validateCustomer($request);
