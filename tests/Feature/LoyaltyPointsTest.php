@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -180,6 +181,22 @@ class LoyaltyPointsTest extends TestCase
         // Batalkan -> poin yang sempat diberikan ditarik kembali.
         $this->post(route('orders.status', $order), ['status' => 'dibatalkan'])->assertSessionHasNoErrors();
         $this->assertSame('dibatalkan', $order->fresh()->status);
+        $this->assertSame(0, (int) $this->customer->fresh()->poin);
+    }
+
+    public function test_program_poin_nonaktif_tidak_memberi_poin(): void
+    {
+        $s = Settings::get($this->member->id);
+        $s['loyalty'] = ['enabled' => false, 'earn_rate' => 10000, 'poin_value' => 1000, 'min_redeem' => 10];
+        Settings::save($s, $this->member->id);
+
+        $this->post(route('orders.store'), [
+            'customer_id' => $this->customer->id,
+            'estimasi_selesai' => now()->addDay()->toDateString(),
+            'status_bayar' => 'lunas',
+            'items' => [['service_id' => $this->service->id, 'qty' => 3]], // 30.000
+        ])->assertSessionHasNoErrors();
+
         $this->assertSame(0, (int) $this->customer->fresh()->poin);
     }
 

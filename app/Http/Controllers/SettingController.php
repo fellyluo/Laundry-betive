@@ -16,6 +16,7 @@ class SettingController extends Controller
             'colorPresets' => Settings::COLOR_PRESETS,
             'bgPresets' => Settings::BG_PRESETS,
             'loyalty' => Settings::loyalty(),
+            'discount' => Settings::discount(),
             'whatsapp' => Settings::whatsapp(),
         ]);
     }
@@ -76,9 +77,13 @@ class SettingController extends Controller
             'theme_mode' => $validated['theme_mode'],
             'payment_methods' => $methods,
             'loyalty' => [
+                'enabled' => $request->boolean('loyalty_enabled'),
                 'earn_rate' => max(100, (int) ($validated['loyalty_earn_rate'] ?? 10000)),
                 'poin_value' => max(0, (int) ($validated['loyalty_poin_value'] ?? 1000)),
                 'min_redeem' => max(1, (int) ($validated['loyalty_min_redeem'] ?? 10)),
+            ],
+            'discount' => [
+                'enabled' => $request->boolean('discount_enabled'),
             ],
             'whatsapp' => [
                 'enabled' => filter_var($request->input('wa_enabled', false), FILTER_VALIDATE_BOOLEAN),

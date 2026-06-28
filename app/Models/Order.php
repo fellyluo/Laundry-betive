@@ -57,8 +57,9 @@ class Order extends Model
 
         $this->status_bayar = $lunas ? 'lunas' : ($paid > 0 ? 'dp' : 'belum');
 
-        if ($lunas && ! $this->poin_awarded) {
-            $rate = Settings::loyalty($this->user_id)['earn_rate'];
+        $loyalty = Settings::loyalty($this->user_id);
+        if ($lunas && ! $this->poin_awarded && $loyalty['enabled']) {
+            $rate = $loyalty['earn_rate'];
             $points = $rate > 0 ? intdiv($net, $rate) : 0;
             if ($points > 0) {
                 $customer = $this->customer()->withoutGlobalScopes()->first();

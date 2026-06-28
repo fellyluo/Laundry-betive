@@ -57,9 +57,13 @@ class Settings
                 ['id' => 'transfer', 'nama' => 'Transfer Bank BCA', 'aktif' => true],
             ],
             'loyalty' => [
+                'enabled' => true,     // program poin aktif?
                 'earn_rate' => 10000,  // Rp belanja untuk dapat 1 poin (saat order lunas)
                 'poin_value' => 1000,  // nilai potongan (Rp) per 1 poin saat ditukar
                 'min_redeem' => 10,    // minimal poin untuk sekali penukaran
+            ],
+            'discount' => [
+                'enabled' => true,     // fitur diskon & voucher aktif?
             ],
             'whatsapp' => [
                 'enabled' => false,
@@ -90,9 +94,21 @@ class Settings
         $l = is_array($s['loyalty'] ?? null) ? $s['loyalty'] : [];
 
         return [
+            'enabled' => (bool) ($l['enabled'] ?? true),
             'earn_rate' => max(0, (int) ($l['earn_rate'] ?? 10000)),
             'poin_value' => max(0, (int) ($l['poin_value'] ?? 1000)),
             'min_redeem' => max(1, (int) ($l['min_redeem'] ?? 10)),
+        ];
+    }
+
+    /** Konfigurasi diskon & voucher. */
+    public static function discount(?int $userId = null): array
+    {
+        $s = func_num_args() === 0 ? self::get() : self::get($userId);
+        $d = is_array($s['discount'] ?? null) ? $s['discount'] : [];
+
+        return [
+            'enabled' => (bool) ($d['enabled'] ?? true),
         ];
     }
 

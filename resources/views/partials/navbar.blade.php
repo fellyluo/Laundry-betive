@@ -16,15 +16,18 @@
         ];
     } else {
         // Member: operasional laundry
+        $discountOn = $appSettings['discount']['enabled'] ?? true;
         $nav = [
             ['name' => 'Dashboard',  'href' => route('dashboard'),    'icon' => 'home',            'active' => request()->is('dashboard')],
             ['name' => 'Order',      'href' => route('orders.index'), 'icon' => 'clipboard-list',  'active' => request()->is('orders') || request()->is('orders/*')],
             ['name' => 'Pelanggan',  'href' => route('customers.index'),'icon' => 'users',         'active' => request()->is('customers*')],
             ['name' => 'Layanan',    'href' => route('services.index'),'icon' => 'washing-machine','active' => request()->is('services*')],
-            ['name' => 'Voucher',    'href' => route('vouchers.index'),'icon' => 'ticket-percent','active' => request()->is('vouchers*')],
-            ['name' => 'Pengeluaran','href' => route('expenses.index'),'icon' => 'receipt',        'active' => request()->is('expenses*')],
-            ['name' => 'Pengaturan', 'href' => route('settings.index'),'icon' => 'settings',       'active' => request()->is('settings*')],
         ];
+        if ($discountOn) {
+            $nav[] = ['name' => 'Voucher', 'href' => route('vouchers.index'), 'icon' => 'ticket-percent', 'active' => request()->is('vouchers*')];
+        }
+        $nav[] = ['name' => 'Pengeluaran','href' => route('expenses.index'),'icon' => 'receipt',     'active' => request()->is('expenses*')];
+        $nav[] = ['name' => 'Pengaturan', 'href' => route('settings.index'),'icon' => 'settings',    'active' => request()->is('settings*')];
     }
 
     $brandSub = $isSuper ? 'Super Admin' : 'Premium Laundry';

@@ -224,6 +224,7 @@ class OrderController extends Controller
             'branding' => $settings['branding'],
             'methods' => $methods,
             'loyalty' => Settings::loyalty($order->user_id),
+            'discountOn' => Settings::discount($order->user_id)['enabled'],
         ]);
     }
 
@@ -284,6 +285,9 @@ class OrderController extends Controller
         }
         if ($order->status_bayar === 'lunas') {
             return back()->with('error', 'Order sudah lunas — tidak perlu menukar poin.');
+        }
+        if (! Settings::loyalty($order->user_id)['enabled']) {
+            return back()->with('error', 'Program poin sedang dinonaktifkan.');
         }
 
         $validated = $request->validate([
@@ -441,9 +445,12 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order)->with('success', 'Diskon dihapus.');
     }
 
-    /** Order boleh diberi/ubah diskon hanya bila belum lunas & belum final. */
+    /** Order boleh diberi/ubah diskon hanya bila fitur aktif, belum lunas & belum final. */
     private function guardDiscountEditable(Order $order)
     {
+        if (! Settings::discount($order->user_id)['enabled']) {
+            return back()->with('error', 'Fitur diskon & voucher sedang dinonaktifkan.');
+        }
         if (in_array($order->status, ['diambil', 'dibatalkan'], true)) {
             return back()->with('error', 'Order sudah diambil/dibatalkan — diskon tidak bisa diubah.');
         }

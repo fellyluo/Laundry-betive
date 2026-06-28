@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Voucher;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -129,6 +130,23 @@ class DiscountVoucherTest extends TestCase
         $this->assertSame(0, (int) $order->fresh()->diskon);
         $this->assertNull($order->fresh()->voucher_code);
         $this->assertSame(0, (int) Voucher::first()->terpakai);
+    }
+
+    public function test_diskon_nonaktif_ditolak(): void
+    {
+        $s = Settings::get($this->member->id);
+        $s['discount'] = ['enabled' => false];
+        Settings::save($s, $this->member->id);
+
+        $order = $this->orderBelum(5);
+
+        $this->post(route('orders.discount', $order), ['tipe' => 'nominal', 'nilai' => 5000])
+            ->assertSessionHas('error');
+        $this->assertSame(0, (int) $order->fresh()->diskon);
+
+        $this->voucher();
+        $this->post(route('orders.voucher', $order), ['kode' => 'HEMAT10'])->assertSessionHas('error');
+        $this->assertSame(0, (int) $order->fresh()->diskon);
     }
 
     public function test_batal_order_mengembalikan_kuota_voucher(): void

@@ -17,16 +17,18 @@
     $diskon = (int) $order->diskon;
     $netTotal = max(0, $order->total - $diskonPoin - $diskon);
     $remaining = $netTotal - $totalPaid;
-    $canDiscount = $order->status_bayar !== 'lunas' && ! in_array($order->status, ['diambil', 'dibatalkan']);
+    $canDiscount = ($discountOn ?? true) && $order->status_bayar !== 'lunas' && ! in_array($order->status, ['diambil', 'dibatalkan']);
 
     // Data program poin (untuk fitur tukar poin di sisi pembayaran).
+    $loyaltyOn = (bool) ($loyalty['enabled'] ?? true);
     $custPoin = (int) ($order->customer->poin ?? 0);
     $custSaldo = (int) ($order->customer->saldo ?? 0);
     $poinValue = (int) ($loyalty['poin_value'] ?? 0);
     $minRedeem = (int) ($loyalty['min_redeem'] ?? 10);
     $maxByBill = $poinValue > 0 ? intdiv(max(0, $remaining), $poinValue) : 0;
     $maxRedeem = min($custPoin, $maxByBill);
-    $canRedeem = $order->status_bayar !== 'lunas'
+    $canRedeem = $loyaltyOn
+        && $order->status_bayar !== 'lunas'
         && ! in_array($order->status, ['diambil', 'dibatalkan'])
         && $poinValue > 0 && $maxRedeem >= $minRedeem;
 
@@ -200,7 +202,7 @@
                 @endif
             </div>
 
-            @if($order->customer && $custPoin > 0 && $poinValue > 0 && ! in_array($order->status, ['diambil', 'dibatalkan']))
+            @if($loyaltyOn && $order->customer && $custPoin > 0 && $poinValue > 0 && ! in_array($order->status, ['diambil', 'dibatalkan']))
                 <div class="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-6 shadow-xl space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="font-bold text-amber-300 text-sm flex items-center gap-2"><i data-lucide="award" class="h-4 w-4"></i><span>Poin Loyalitas</span></h4>

@@ -81,6 +81,12 @@
                 <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                     <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 text-accent"></i><span>Program Poin Loyalitas</span></h3>
                     <p class="text-[11px] text-slate-500 -mt-1">Poin diberikan otomatis saat order <span class="text-emerald-400 font-semibold">LUNAS</span>, dan bisa ditukar pelanggan jadi potongan harga.</p>
+
+                    <label class="flex items-center gap-3 p-3 bg-slate-950/50 border border-slate-850 rounded-xl cursor-pointer">
+                        <input type="checkbox" name="loyalty_enabled" value="1" {{ $loyalty['enabled'] ? 'checked' : '' }} class="w-4 h-4 accent-amber-500">
+                        <span class="text-sm font-semibold text-slate-200">Aktifkan program poin loyalitas</span>
+                    </label>
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="space-y-2">
                             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Belanja per 1 Poin (Rp)</label>
@@ -98,6 +104,17 @@
                             <p class="text-[10px] text-slate-550">Poin minimum untuk sekali penukaran.</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- 1b2. Diskon & Voucher -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="font-bold text-white text-base border-b border-slate-850 pb-3 flex items-center gap-2"><i data-lucide="ticket-percent" class="h-5 w-5 text-accent"></i><span>Diskon &amp; Voucher</span></h3>
+                    <p class="text-[11px] text-slate-500 -mt-1">Bila diaktifkan, kasir bisa memberi diskon manual atau memakai kode voucher saat pembayaran order, dan menu <span class="font-semibold text-slate-300">Voucher</span> muncul di sidebar.</p>
+
+                    <label class="flex items-center gap-3 p-3 bg-slate-950/50 border border-slate-850 rounded-xl cursor-pointer">
+                        <input type="checkbox" name="discount_enabled" value="1" {{ $discount['enabled'] ? 'checked' : '' }} class="w-4 h-4 accent-teal-500">
+                        <span class="text-sm font-semibold text-slate-200">Aktifkan fitur diskon &amp; voucher</span>
+                    </label>
                 </div>
 
                 <!-- 1c. Notifikasi WhatsApp -->
