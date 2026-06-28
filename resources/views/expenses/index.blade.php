@@ -60,17 +60,17 @@
             <table class="w-full text-left border-collapse min-w-[520px]">
                 <thead>
                     <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold">
-                        <th class="pb-3 w-32">Tanggal</th><th class="pb-3">Keterangan</th><th class="pb-3 w-36">Kategori</th><th class="pb-3 w-32 text-right">Jumlah</th><th class="pb-3 w-16 text-right">Aksi</th>
+                        <th class="pb-3 pr-3 w-32">Tanggal</th><th class="pb-3 px-3">Keterangan</th><th class="pb-3 px-3 w-36">Kategori</th><th class="pb-3 px-3 w-32 text-right">Jumlah</th><th class="pb-3 pl-3 w-16 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-850">
                     @foreach($expenses as $e)
                         <tr class="text-sm hover:bg-slate-800/10 transition-colors">
-                            <td class="py-4 text-slate-400 font-mono text-xs">{{ format_date($e->tanggal) }}</td>
-                            <td class="py-4 font-medium text-slate-200">{{ $e->keterangan }}</td>
-                            <td class="py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $catBadge($e->kategori) }}">{{ $catLabel[$e->kategori] ?? ucfirst($e->kategori) }}</span></td>
-                            <td class="py-4 text-right font-bold text-rose-400 font-mono">-{{ format_rupiah($e->jumlah) }}</td>
-                            <td class="py-4 text-right">
+                            <td class="py-4 pr-3 text-slate-400 font-mono text-xs">{{ format_date($e->tanggal) }}</td>
+                            <td class="py-4 px-3 font-medium text-slate-200">{{ $e->keterangan }}</td>
+                            <td class="py-4 px-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $catBadge($e->kategori) }}">{{ $catLabel[$e->kategori] ?? ucfirst($e->kategori) }}</span></td>
+                            <td class="py-4 px-3 text-right font-bold text-rose-400 font-mono">-{{ format_rupiah($e->jumlah) }}</td>
+                            <td class="py-4 pl-3 text-right">
                                 <form method="POST" action="{{ route('expenses.destroy', $e) }}" onsubmit="return confirm('Hapus pengeluaran ini?')" class="inline">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="p-1.5 bg-slate-800/50 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition-colors" title="Hapus"><i data-lucide="trash-2" class="h-4 w-4"></i></button>

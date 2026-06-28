@@ -16,7 +16,7 @@
 /* Fluid scaling: UI (rem-based) auto-adjusts to screen size.
    Never below 16px so phones stay readable; grows gently on big monitors. */
 html {
-  font-size: clamp(16px, 0.55vw + 11.5px, 18.5px);
+  font-size: clamp(14px, 0.25vw + 12px, 15.5px);
   -webkit-text-size-adjust: 100%;
 }
 

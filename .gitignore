@@ -17,6 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/.claude
 
 # Local SQLite data + backups (jangan commit data ke git)
 /database/database.sqlite

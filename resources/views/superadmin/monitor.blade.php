@@ -52,29 +52,29 @@
                 <table class="w-full text-left border-collapse min-w-[640px]">
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold">
-                            <th class="pb-3">Member</th>
-                            <th class="pb-3 w-24">Status</th>
-                            <th class="pb-3 w-20 text-right">Order</th>
-                            <th class="pb-3 w-36 text-right">Omzet</th>
-                            <th class="pb-3 w-24 text-right">Pelanggan</th>
-                            <th class="pb-3 w-32">Sewa s/d</th>
+                            <th class="pb-3 pr-3">Member</th>
+                            <th class="pb-3 px-3 w-24">Status</th>
+                            <th class="pb-3 px-3 w-20 text-right">Order</th>
+                            <th class="pb-3 px-3 w-36 text-right">Omzet</th>
+                            <th class="pb-3 px-3 w-24 text-right">Pelanggan</th>
+                            <th class="pb-3 pl-3 w-32">Sewa s/d</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-850">
                         @foreach($rows as $r)
                             @php $m = $r['m']; $days = $m->daysLeft(); @endphp
                             <tr class="text-sm hover:bg-slate-800/10 transition-colors">
-                                <td class="py-3.5">
+                                <td class="py-3.5 pr-3">
                                     <div class="font-bold text-white">{{ $m->username }}</div>
                                     @if($m->name)<div class="text-[11px] text-slate-500">{{ $m->name }}</div>@endif
                                 </td>
-                                <td class="py-3.5">
+                                <td class="py-3.5 px-3">
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $r['blocked'] ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-450 border border-emerald-500/20' }}">{{ $r['blocked'] ? 'Nonaktif' : 'Aktif' }}</span>
                                 </td>
-                                <td class="py-3.5 text-right font-mono text-slate-300">{{ $r['orders'] }}</td>
-                                <td class="py-3.5 text-right font-mono font-bold text-accent">{{ format_rupiah($r['omzet']) }}</td>
-                                <td class="py-3.5 text-right font-mono text-slate-300">{{ $r['customers'] }}</td>
-                                <td class="py-3.5 text-xs">
+                                <td class="py-3.5 px-3 text-right font-mono text-slate-300">{{ $r['orders'] }}</td>
+                                <td class="py-3.5 px-3 text-right font-mono font-bold text-accent">{{ format_rupiah($r['omzet']) }}</td>
+                                <td class="py-3.5 px-3 text-right font-mono text-slate-300">{{ $r['customers'] }}</td>
+                                <td class="py-3.5 pl-3 text-xs">
                                     @if($m->subscribed_until)
                                         <span class="text-slate-400">{{ format_date($m->subscribed_until) }}</span>
                                         @if($days !== null)<span class="block text-[10px] {{ $days < 0 ? 'text-rose-400' : ($days <= 7 ? 'text-amber-450' : 'text-slate-500') }}">{{ $days < 0 ? 'lewat '.abs($days).' hr' : $days.' hr lagi' }}</span>@endif

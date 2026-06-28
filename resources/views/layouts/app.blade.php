@@ -53,10 +53,30 @@
     @include('partials.navbar')
 
     <main class="flex-1 flex flex-col min-h-screen overflow-y-auto pt-14 md:pt-0 pb-20 md:pb-0">
-        <div class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+        <div class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
             @yield('content')
         </div>
     </main>
+
+    <!-- Global Custom Confirm Modal -->
+    <div id="globalConfirmModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-[9999] hidden items-center justify-center p-4">
+        <div id="globalConfirmContent" class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center space-y-6 transition-all duration-200 transform scale-95 opacity-0">
+            <!-- Icon -->
+            <div id="globalConfirmIconContainer" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center">
+                <i id="globalConfirmIcon" data-lucide="trash-2" class="h-6 w-6"></i>
+            </div>
+            <!-- Text -->
+            <div class="space-y-2">
+                <h3 id="globalConfirmTitle" class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase">Konfirmasi Tindakan</h3>
+                <p id="globalConfirmMessage" class="text-white text-sm font-semibold leading-relaxed px-2"></p>
+            </div>
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button type="button" id="globalConfirmCancelBtn" class="flex-1 py-2.5 rounded-xl border border-slate-800 hover:border-slate-700 text-slate-300 font-semibold transition-colors text-xs cursor-pointer">Batal</button>
+                <button type="button" id="globalConfirmOkBtn" class="flex-1 py-2.5 rounded-xl text-white font-semibold shadow-lg transition-colors text-xs cursor-pointer">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
@@ -81,6 +101,92 @@
                 body: JSON.stringify({ mode: newMode })
             }).then(() => { window.location.reload(); }).catch(() => {});
         }
+
+        // Global confirmation handler to replace native confirm dialogs
+        let activeConfirmCallback = null;
+
+        function showCustomConfirm(message, callback) {
+            activeConfirmCallback = callback;
+            
+            const modal = document.getElementById('globalConfirmModal');
+            const content = document.getElementById('globalConfirmContent');
+            const msgEl = document.getElementById('globalConfirmMessage');
+            const titleEl = document.getElementById('globalConfirmTitle');
+            const iconContainer = document.getElementById('globalConfirmIconContainer');
+            const iconEl = document.getElementById('globalConfirmIcon');
+            const okBtn = document.getElementById('globalConfirmOkBtn');
+
+            msgEl.textContent = message;
+
+            const msgLower = message.toLowerCase();
+            const isDestructive = msgLower.includes('hapus') || msgLower.includes('batal') || msgLower.includes('delete') || msgLower.includes('cancel');
+
+            if (isDestructive) {
+                titleEl.textContent = 'Hapus / Batalkan?';
+                iconContainer.className = 'mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-rose-500/10 text-rose-500 border border-rose-500/20';
+                iconEl.setAttribute('data-lucide', 'trash-2');
+                okBtn.className = 'flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-lg transition-colors text-xs cursor-pointer';
+                okBtn.textContent = msgLower.includes('batal') ? 'Ya, Batalkan' : 'Ya, Hapus';
+            } else {
+                titleEl.textContent = 'Konfirmasi Tindakan';
+                iconContainer.className = 'mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-accent/10 text-accent border border-accent/20';
+                iconEl.setAttribute('data-lucide', 'help-circle');
+                okBtn.className = 'flex-1 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white font-semibold shadow-lg transition-colors text-xs cursor-pointer';
+                okBtn.textContent = 'Ya, Lanjutkan';
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCustomConfirm(confirmed) {
+            const modal = document.getElementById('globalConfirmModal');
+            const content = document.getElementById('globalConfirmContent');
+
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (confirmed && activeConfirmCallback) {
+                    activeConfirmCallback();
+                }
+                activeConfirmCallback = null;
+            }, 150);
+        }
+
+        document.getElementById('globalConfirmCancelBtn').addEventListener('click', () => closeCustomConfirm(false));
+        document.getElementById('globalConfirmOkBtn').addEventListener('click', () => closeCustomConfirm(true));
+
+        // Intercept native confirm calls inside onsubmit attributes
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            const onsubmitAttr = form.getAttribute('onsubmit');
+            if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const match = onsubmitAttr.match(/confirm\((['"`])(.*?)\1\)/);
+                const message = match ? match[2] : 'Apakah Anda yakin?';
+
+                showCustomConfirm(message, function() {
+                    const originalOnsubmit = form.onsubmit;
+                    form.onsubmit = null;
+                    form.submit();
+                    form.onsubmit = originalOnsubmit;
+                });
+            }
+        }, true);
 
         // PWA service worker
         if ('serviceWorker' in navigator) {
