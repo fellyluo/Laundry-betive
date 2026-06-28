@@ -12,8 +12,9 @@
     $logByStatus = $order->logs->keyBy('status');
 
     $totalPaid = $order->payments->sum('jumlah');
-    $diskon = (int) $order->diskon_poin;
-    $net = max(0, $order->total - $diskon);
+    $diskonPoin = (int) $order->diskon_poin;
+    $diskon = (int) $order->diskon;
+    $net = max(0, $order->total - $diskonPoin - $diskon);
     $sisa = max(0, $net - $totalPaid);
 
     $statusBadge = match($order->status) {
@@ -75,8 +76,11 @@
         @endforeach
         <div class="border-t border-slate-800 pt-2 mt-2 space-y-1">
             <div class="flex justify-between text-xs text-slate-400"><span>Total</span><span class="font-mono">{{ format_rupiah($order->total) }}</span></div>
+            @if($diskonPoin > 0)
+                <div class="flex justify-between text-xs text-amber-400"><span>Potongan Poin</span><span class="font-mono">- {{ format_rupiah($diskonPoin) }}</span></div>
+            @endif
             @if($diskon > 0)
-                <div class="flex justify-between text-xs text-amber-400"><span>Potongan Poin</span><span class="font-mono">- {{ format_rupiah($diskon) }}</span></div>
+                <div class="flex justify-between text-xs text-accent"><span>Diskon{{ $order->voucher_code ? ' ('.$order->voucher_code.')' : '' }}</span><span class="font-mono">- {{ format_rupiah($diskon) }}</span></div>
             @endif
             <div class="flex justify-between text-xs text-slate-400"><span>Dibayar</span><span class="font-mono text-emerald-400">{{ format_rupiah($totalPaid) }}</span></div>
             <div class="flex justify-between text-sm font-bold text-white"><span>Sisa Tagihan</span><span class="font-mono text-accent">{{ format_rupiah($sisa) }}</span></div>

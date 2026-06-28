@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Service;
+use App\Models\Voucher;
 use App\Support\Settings;
 use App\Support\WhatsappNotifier;
 use Carbon\Carbon;
@@ -259,6 +260,7 @@ class OrderController extends Controller
         // Pembatalan: tarik kembali poin yang sempat diberikan & kembalikan poin yang sempat ditukar.
         if ($target === 'dibatalkan') {
             $order->reverseLoyaltyOnCancel();
+            $this->releaseVoucher($order); // kembalikan kuota voucher
         }
 
         // Cucian selesai: kirim notifikasi WhatsApp otomatis (jika diaktifkan member).
@@ -335,6 +337,129 @@ class OrderController extends Controller
 
         return redirect()->route('orders.show', $order)
             ->with('success', "Berhasil menukar {$poin} poin menjadi potongan ".format_rupiah($disc).'.');
+    }
+
+    /** Terapkan potongan manual (nominal/persen) ke order yang belum lunas. */
+    public function applyDiscount(Request $request, Order $order)
+    {
+        if ($err = $this->guardDiscountEditable($order)) {
+            return $err;
+        }
+
+        $validated = $request->validate([
+            'tipe' => 'required|in:nominal,persen',
+            'nilai' => 'required|integer|min:1',
+        ]);
+        $tipe = $validated['tipe'];
+        $nilai = (int) $validated['nilai'];
+        if ($tipe === 'persen' && $nilai > 100) {
+            return back()->with('error', 'Persentase diskon maksimal 100%.');
+        }
+
+        $base = (int) $order->total - (int) $order->diskon_poin; // dasar setelah potongan poin
+        $paid = (int) $order->payments()->sum('jumlah');
+        $maxDisc = max(0, $base - $paid);
+        $disc = $tipe === 'persen' ? (int) round($base * $nilai / 100) : $nilai;
+        $disc = min($disc, $maxDisc);
+
+        if ($disc <= 0) {
+            return back()->with('error', 'Diskon tidak bisa diterapkan (tagihan sudah terbayar/nol).');
+        }
+
+        DB::transaction(function () use ($order, $disc) {
+            $this->releaseVoucher($order); // lepaskan voucher lama bila ada
+            $order->diskon = $disc;
+            $order->voucher_code = null;
+            $order->save();
+            $order->syncPaymentStatus();
+        });
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Diskon '.format_rupiah($disc).' diterapkan.');
+    }
+
+    /** Terapkan voucher (berdasarkan kode) ke order yang belum lunas. */
+    public function applyVoucher(Request $request, Order $order)
+    {
+        if ($err = $this->guardDiscountEditable($order)) {
+            return $err;
+        }
+
+        $validated = $request->validate(['kode' => 'required|string|max:40']);
+        $kode = strtoupper(preg_replace('/\s+/', '', $validated['kode']));
+
+        $voucher = Voucher::where('kode', $kode)->first();
+        if (! $voucher) {
+            return back()->with('error', 'Kode voucher tidak ditemukan.');
+        }
+        if (! $voucher->bisaDipakai()) {
+            $alasan = ! $voucher->aktif ? 'nonaktif' : ($voucher->kadaluarsaLewat() ? 'sudah kedaluwarsa' : 'kuotanya habis');
+
+            return back()->with('error', "Voucher {$kode} {$alasan}.");
+        }
+
+        $base = (int) $order->total - (int) $order->diskon_poin;
+        if ($base < $voucher->min_belanja) {
+            return back()->with('error', 'Minimal belanja untuk voucher ini '.format_rupiah($voucher->min_belanja).'.');
+        }
+
+        $paid = (int) $order->payments()->sum('jumlah');
+        $maxDisc = max(0, $base - $paid);
+        $disc = min($voucher->hitungDiskon($base), $maxDisc);
+        if ($disc <= 0) {
+            return back()->with('error', 'Voucher tidak bisa diterapkan (tagihan sudah terbayar/nol).');
+        }
+
+        DB::transaction(function () use ($order, $voucher, $disc) {
+            $this->releaseVoucher($order); // lepaskan voucher lama bila ada
+            $voucher->increment('terpakai');
+            $order->diskon = $disc;
+            $order->voucher_code = $voucher->kode;
+            $order->save();
+            $order->syncPaymentStatus();
+        });
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', "Voucher {$kode} diterapkan (potongan ".format_rupiah($disc).').');
+    }
+
+    /** Hapus potongan diskon/voucher dari order. */
+    public function removeDiscount(Order $order)
+    {
+        if ($err = $this->guardDiscountEditable($order)) {
+            return $err;
+        }
+
+        DB::transaction(function () use ($order) {
+            $this->releaseVoucher($order);
+            $order->diskon = 0;
+            $order->voucher_code = null;
+            $order->save();
+            $order->syncPaymentStatus();
+        });
+
+        return redirect()->route('orders.show', $order)->with('success', 'Diskon dihapus.');
+    }
+
+    /** Order boleh diberi/ubah diskon hanya bila belum lunas & belum final. */
+    private function guardDiscountEditable(Order $order)
+    {
+        if (in_array($order->status, ['diambil', 'dibatalkan'], true)) {
+            return back()->with('error', 'Order sudah diambil/dibatalkan — diskon tidak bisa diubah.');
+        }
+        if ($order->status_bayar === 'lunas') {
+            return back()->with('error', 'Order sudah lunas — diskon tidak bisa diubah.');
+        }
+
+        return null;
+    }
+
+    /** Kembalikan kuota voucher yang sebelumnya dipakai order ini (bila ada). */
+    private function releaseVoucher(Order $order): void
+    {
+        if ($order->voucher_code) {
+            Voucher::where('kode', $order->voucher_code)->where('terpakai', '>', 0)->decrement('terpakai');
+        }
     }
 
     public function addPayment(Request $request, Order $order)

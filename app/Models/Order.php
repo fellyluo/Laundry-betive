@@ -13,7 +13,8 @@ class Order extends Model
 
     protected $fillable = [
         'user_id', 'nomor_nota', 'public_token', 'customer_id', 'tanggal_masuk', 'estimasi_selesai',
-        'status', 'total', 'status_bayar', 'poin_awarded', 'poin_redeemed', 'diskon_poin', 'catatan',
+        'status', 'total', 'status_bayar', 'poin_awarded', 'poin_redeemed', 'diskon_poin',
+        'diskon', 'voucher_code', 'catatan',
     ];
 
     protected $casts = [
@@ -23,6 +24,7 @@ class Order extends Model
         'poin_awarded' => 'boolean',
         'poin_redeemed' => 'integer',
         'diskon_poin' => 'integer',
+        'diskon' => 'integer',
     ];
 
     /** Buat token publik unik untuk halaman lacak status pelanggan. */
@@ -35,10 +37,10 @@ class Order extends Model
         return $token;
     }
 
-    /** Tagihan bersih = total dikurangi potongan poin (tidak pernah negatif). */
+    /** Tagihan bersih = total dikurangi potongan poin & diskon/voucher (tidak pernah negatif). */
     public function netTotal(): int
     {
-        return max(0, (int) $this->total - (int) $this->diskon_poin);
+        return max(0, (int) $this->total - (int) $this->diskon_poin - (int) $this->diskon);
     }
 
     /**

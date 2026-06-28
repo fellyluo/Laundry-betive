@@ -12,6 +12,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 // ---- Root: tanpa landing internal (landing ada di website terpisah). Arahkan ke login. ----
@@ -80,6 +81,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
             Route::post('/orders/{order}/payment', [OrderController::class, 'addPayment'])->name('orders.payment');
             Route::post('/orders/{order}/redeem', [OrderController::class, 'redeemPoints'])->name('orders.redeem');
+            Route::post('/orders/{order}/discount', [OrderController::class, 'applyDiscount'])->name('orders.discount');
+            Route::post('/orders/{order}/voucher', [OrderController::class, 'applyVoucher'])->name('orders.voucher');
+            Route::post('/orders/{order}/discount/remove', [OrderController::class, 'removeDiscount'])->name('orders.discount.remove');
 
             // Customers
             Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
@@ -89,6 +93,13 @@ Route::middleware('auth')->group(function () {
             Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
             Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
             Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+            // Vouchers / diskon
+            Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+            Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
+            Route::put('/vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
+            Route::post('/vouchers/{voucher}/toggle', [VoucherController::class, 'toggle'])->name('vouchers.toggle');
+            Route::delete('/vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
 
             // Services
             Route::get('/services', [ServiceController::class, 'index'])->name('services.index');

@@ -14,8 +14,10 @@
     }
     $totalPaid = $order->payments->sum('jumlah');
     $diskonPoin = (int) $order->diskon_poin;
-    $netTotal = max(0, $order->total - $diskonPoin);
+    $diskon = (int) $order->diskon;
+    $netTotal = max(0, $order->total - $diskonPoin - $diskon);
     $remaining = $netTotal - $totalPaid;
+    $canDiscount = $order->status_bayar !== 'lunas' && ! in_array($order->status, ['diambil', 'dibatalkan']);
 
     // Data program poin (untuk fitur tukar poin di sisi pembayaran).
     $custPoin = (int) ($order->customer->poin ?? 0);
@@ -37,7 +39,8 @@
         'status' => $order->status,
         'status_bayar' => $order->status_bayar,
         'total' => $order->total,
-        'diskon' => $diskonPoin,
+        'diskonPoin' => $diskonPoin,
+        'diskonVoucher' => $diskon,
         'net' => $netTotal,
         'paid' => $totalPaid,
         'customer' => ['nama' => $order->customer->nama ?? 'Umum', 'no_hp' => $order->customer->no_hp ?? ''],
@@ -139,6 +142,11 @@
                         <div class="flex justify-between w-64 text-slate-450"><span>Subtotal Tagihan:</span><span class="font-mono font-bold text-slate-300">{{ format_rupiah($order->total) }}</span></div>
                         @if($diskonPoin > 0)
                             <div class="flex justify-between w-64 text-amber-400"><span class="flex items-center gap-1"><i data-lucide="award" class="h-3.5 w-3.5"></i>Potongan Poin ({{ $order->poin_redeemed }}):</span><span class="font-mono font-bold">- {{ format_rupiah($diskonPoin) }}</span></div>
+                        @endif
+                        @if($diskon > 0)
+                            <div class="flex justify-between w-64 text-accent"><span class="flex items-center gap-1"><i data-lucide="ticket-percent" class="h-3.5 w-3.5"></i>Diskon{{ $order->voucher_code ? ' ('.$order->voucher_code.')' : '' }}:</span><span class="font-mono font-bold">- {{ format_rupiah($diskon) }}</span></div>
+                        @endif
+                        @if($diskonPoin > 0 || $diskon > 0)
                             <div class="flex justify-between w-64 text-slate-450"><span>Total Setelah Potongan:</span><span class="font-mono font-bold text-slate-200">{{ format_rupiah($netTotal) }}</span></div>
                         @endif
                         <div class="flex justify-between w-64 text-slate-450"><span>Sudah Dibayar:</span><span class="font-mono font-bold text-emerald-450">{{ format_rupiah($totalPaid) }}</span></div>
@@ -209,6 +217,44 @@
                 </div>
             @endif
 
+            @if($canDiscount || $diskon > 0)
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
+                    <h4 class="font-bold text-white text-sm flex items-center gap-2"><i data-lucide="ticket-percent" class="h-4 w-4 text-accent"></i><span>Diskon &amp; Voucher</span></h4>
+
+                    @if($diskon > 0)
+                        <div class="flex items-center justify-between p-3 bg-accent/5 border border-accent/20 rounded-xl">
+                            <div class="text-xs">
+                                <span class="text-accent font-bold font-mono">- {{ format_rupiah($diskon) }}</span>
+                                @if($order->voucher_code)<span class="text-slate-400 font-mono"> · {{ $order->voucher_code }}</span>@endif
+                            </div>
+                            @if($canDiscount)
+                                <form method="POST" action="{{ route('orders.discount.remove', $order) }}">@csrf
+                                    <button type="submit" class="text-[11px] font-bold text-rose-400 hover:underline">Hapus</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if($canDiscount)
+                        <form method="POST" action="{{ route('orders.voucher', $order) }}" class="flex gap-2">@csrf
+                            <input type="text" name="kode" placeholder="Kode voucher" oninput="this.value=this.value.toUpperCase()" class="flex-1 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none transition-all text-xs font-mono uppercase">
+                            <button type="submit" class="px-3 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-colors shrink-0">Pakai</button>
+                        </form>
+                        <div class="flex items-center gap-2 pt-1">
+                            <div class="h-px bg-slate-800 flex-1"></div><span class="text-[10px] text-slate-600 uppercase">atau diskon manual</span><div class="h-px bg-slate-800 flex-1"></div>
+                        </div>
+                        <form method="POST" action="{{ route('orders.discount', $order) }}" class="flex gap-2" onsubmit="return validateDisc(event)">@csrf
+                            <select name="tipe" class="bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-2 py-2 text-white focus:outline-none transition-all text-xs font-semibold shrink-0">
+                                <option value="nominal">Rp</option>
+                                <option value="persen">%</option>
+                            </select>
+                            <input type="number" name="nilai" id="discNilai" min="1" placeholder="Nilai" class="flex-1 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-accent rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none transition-all text-xs">
+                            <button type="submit" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-colors shrink-0">Terapkan</button>
+                        </form>
+                    @endif
+                </div>
+            @endif
+
             <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                 <h4 class="font-bold text-white text-sm">Ukuran Cetak Thermal</h4>
                 <div class="grid grid-cols-2 gap-2">
@@ -269,6 +315,11 @@
         <div class="flex justify-between font-extrabold text-sm"><span>TOTAL TAGIHAN:</span><span>{{ format_rupiah($order->total) }}</span></div>
         @if($diskonPoin > 0)
             <div class="flex justify-between"><span>Potongan Poin ({{ $order->poin_redeemed }}):</span><span>- {{ format_rupiah($diskonPoin) }}</span></div>
+        @endif
+        @if($diskon > 0)
+            <div class="flex justify-between"><span>Diskon{{ $order->voucher_code ? ' ('.$order->voucher_code.')' : '' }}:</span><span>- {{ format_rupiah($diskon) }}</span></div>
+        @endif
+        @if($diskonPoin > 0 || $diskon > 0)
             <div class="flex justify-between font-bold"><span>Total Bayar:</span><span>{{ format_rupiah($netTotal) }}</span></div>
         @endif
         <div class="flex justify-between"><span>Jumlah Dibayar:</span><span>{{ format_rupiah($totalPaid) }}</span></div>
@@ -378,6 +429,11 @@
         }
     })();
     function copyTrackUrl(){ navigator.clipboard?.writeText(TRACK_URL).then(()=>{}, ()=>{}); }
+    function validateDisc(e){
+        const v = parseInt(document.getElementById('discNilai').value || '0', 10);
+        if (isNaN(v) || v < 1){ alert('Nilai diskon harus angka positif.'); e.preventDefault(); return false; }
+        return true;
+    }
 
     const ORDER = @json($orderJs);
     const POIN_VALUE = {{ $poinValue }};
@@ -422,7 +478,9 @@
         text += `Rincian Layanan:\n`;
         o.items.forEach(it => { text += `- ${it.nama}: ${fmtQty(it.qty)} ${it.satuan} x ${rupiah(it.harga)} = ${rupiah(it.subtotal)}\n`; });
         text += `\n*Total Biaya*: *${rupiah(o.total)}*\n`;
-        if (o.diskon > 0) text += `*Potongan Poin*: -${rupiah(o.diskon)}\n*Total Bayar*: *${rupiah(o.net)}*\n`;
+        if (o.diskonPoin > 0) text += `*Potongan Poin*: -${rupiah(o.diskonPoin)}\n`;
+        if (o.diskonVoucher > 0) text += `*Diskon*: -${rupiah(o.diskonVoucher)}\n`;
+        if (o.diskonPoin > 0 || o.diskonVoucher > 0) text += `*Total Bayar*: *${rupiah(o.net)}*\n`;
         if (unpaid > 0) text += `*Sisa Tagihan*: *${rupiah(unpaid)}* (Status: Belum Bayar)\n\n`;
         else text += `*Status Bayar*: *LUNAS* (Terima kasih) ✅\n\n`;
         text += `Silakan berkunjung kembali untuk mengambil cucian Anda.\nTerima kasih telah berlangganan di *${o.laundryName}*! ✨`;
